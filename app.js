@@ -10,9 +10,50 @@ let state = null;
 let currentFilter = 'all'; // all | unfilled | anomaly
 let searchKeyword = '';
 let saveTimer = null;
+let photoKeys = new Set(); // 本期已拍照存證的 `${rowId}_${type}` 集合
+let thumbObjectUrls = [];
 
 const TYPE_LABEL = { water: '水錶（度）', electric: '電錶（度）', gas: '瓦斯（KG）' };
 const TYPE_SECTION_LABEL = { water: '水錶', electric: '電錶', gas: '瓦斯' };
+
+/* ---------------- 拍照存證 ---------------- */
+
+async function loadPhotoKeys() {
+  try {
+    photoKeys = await getPhotoKeysForPeriod(state.currentPeriod);
+  } catch (err) {
+    photoKeys = new Set();
+  }
+}
+
+function revokeThumbUrls() {
+  thumbObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+  thumbObjectUrls = [];
+}
+
+async function loadPhotoThumbnails() {
+  const imgs = document.querySelectorAll('.photo-thumb.has-photo');
+  for (const img of imgs) {
+    try {
+      const blob = await getPhotoBlob(state.currentPeriod, img.dataset.row, img.dataset.type);
+      if (!blob) continue;
+      const url = URL.createObjectURL(blob);
+      thumbObjectUrls.push(url);
+      img.src = url;
+      img.style.display = '';
+    } catch (err) { /* 縮圖載入失敗不影響操作 */ }
+  }
+}
+
+function photoControlHtml(rowId, type) {
+  const hasPhoto = photoKeys.has(`${rowId}_${type}`);
+  return `
+    <div class="photo-control">
+      <img class="photo-thumb${hasPhoto ? ' has-photo' : ''}" data-row="${rowId}" data-type="${type}" style="display:none" alt="錶照片" />
+      <button type="button" class="btn-photo" data-row="${rowId}" data-type="${type}">${hasPhoto ? '重拍' : '📷 拍照存證'}</button>
+      <input type="file" accept="image/*" capture="environment" class="photo-file-input" data-row="${rowId}" data-type="${type}" hidden />
+    </div>`;
+}
 
 /* ---------------- 工具函式 ---------------- */
 
@@ -270,10 +311,13 @@ function meterCellHtml(row, type) {
   const reading = st.reading;
   const cost = computeCost(type, st.usage);
   const statusClass = statusClassOf(st.status);
+  const editable = isAdmin();
+  const hasPhoto = photoKeys.has(`${row.id}_${type}`);
 
   const meterNoCell = type === 'water' ? '' : `
     <td class="meter-no-cell">
       <input type="text" class="cell-input meter-no-input" value="${escapeHtml(slot.meterNo || '')}"
+        ${editable ? '' : 'readonly'}
         data-row="${row.id}" data-type="${type}" data-field="meterNo" />
       ${slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : ''}
     </td>`;
@@ -281,11 +325,13 @@ function meterCellHtml(row, type) {
   return `${meterNoCell}
     <td class="last-cell">
       <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
+        ${editable ? '' : 'readonly'}
         data-row="${row.id}" data-type="${type}" data-field="last" />
     </td>
     <td class="this-cell field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
+      ${photoControlHtml(row.id, type)}
       <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-        placeholder="待填"
+        placeholder="${hasPhoto ? '待填' : '請先拍照'}" ${hasPhoto ? '' : 'disabled'}
         data-row="${row.id}" data-type="${type}" data-field="this" />
     </td>
     <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost)}</td>`;
@@ -302,11 +348,14 @@ function meterCardBlock(row, type) {
   const reading = st.reading;
   const cost = computeCost(type, st.usage);
   const statusClass = statusClassOf(st.status);
+  const editable = isAdmin();
+  const hasPhoto = photoKeys.has(`${row.id}_${type}`);
 
   const meterNoField = type === 'water' ? '' : `
     <div class="card-field-full">
       <label>${type === 'electric' ? '電表號碼' : '瓦斯錶號'}</label>
       <input type="text" class="cell-input meter-no-input" value="${escapeHtml(slot.meterNo || '')}"
+        ${editable ? '' : 'readonly'}
         data-row="${row.id}" data-type="${type}" data-field="meterNo" />
       ${slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : ''}
     </div>`;
@@ -319,12 +368,14 @@ function meterCardBlock(row, type) {
         <div class="card-field">
           <label>上月度數</label>
           <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
+            ${editable ? '' : 'readonly'}
             data-row="${row.id}" data-type="${type}" data-field="last" />
         </div>
         <div class="card-field field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
           <label>本月度數</label>
+          ${photoControlHtml(row.id, type)}
           <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-            placeholder="待填"
+            placeholder="${hasPhoto ? '待填' : '請先拍照'}" ${hasPhoto ? '' : 'disabled'}
             data-row="${row.id}" data-type="${type}" data-field="this" />
         </div>
       </div>
@@ -431,6 +482,8 @@ function renderTable() {
   }
 
   renderFooterTotals();
+  revokeThumbUrls();
+  loadPhotoThumbnails();
 }
 
 function renderFooterTotals() {
@@ -479,17 +532,18 @@ function renderPeriodControls() {
   document.getElementById('readingDateInput').value = state.periods[state.currentPeriod].readingDate || '';
 }
 
-function switchPeriod(period) {
+async function switchPeriod(period) {
   state.currentPeriod = period;
   saveState();
+  await loadPhotoKeys();
   renderAll();
 }
 
-function createNextPeriod() {
+async function createNextPeriod() {
   const cur = state.currentPeriod;
   const next = nextPeriodKey(cur);
   if (state.periods[next]) {
-    switchPeriod(next);
+    await switchPeriod(next);
     toast(`已切換至 ${periodLabel(next)}（該期別已存在）`);
     return;
   }
@@ -507,6 +561,7 @@ function createNextPeriod() {
   state.periods[next] = { readingDate: '', readings: newReadings };
   state.currentPeriod = next;
   saveState();
+  await loadPhotoKeys();
   renderAll();
   toast(`已建立 ${periodLabel(next)}，上月度數已自動帶入`);
 }
@@ -521,6 +576,7 @@ function handleTableInput(e) {
   const field = input.dataset.field;
   const row = state.rows.find((r) => r.id === rowId);
   if (!row) return;
+  if (field !== 'this' && !isAdmin()) return; // 上月度數／錶號僅管理員可編輯
 
   if (field === 'meterNo') {
     row[type].meterNo = input.value;
@@ -809,6 +865,21 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+/* ---------------- 角色權限 ---------------- */
+
+const ADMIN_ONLY_BUTTON_IDS = [
+  'btnNextPeriod', 'btnPrice', 'btnManage',
+  'btnExportCsv', 'btnExportExcel', 'btnPrint',
+  'btnBackupExport', 'btnBackupImport',
+];
+
+function applyRolePermissions() {
+  const admin = isAdmin();
+  ADMIN_ONLY_BUTTON_IDS.forEach((id) => {
+    document.getElementById(id).style.display = admin ? '' : 'none';
+  });
+}
+
 /* ---------------- 主渲染 ---------------- */
 
 function renderAll() {
@@ -824,8 +895,33 @@ function setHandlers() {
     const el = document.getElementById(id);
     el.addEventListener('input', handleTableInput);
     el.addEventListener('click', (e) => {
+      const photoBtn = e.target.closest('.btn-photo');
+      if (photoBtn) {
+        const fileInput = el.querySelector(
+          `.photo-file-input[data-row="${photoBtn.dataset.row}"][data-type="${photoBtn.dataset.type}"]`
+        );
+        if (fileInput) fileInput.click();
+        return;
+      }
       const btn = e.target.closest('.history-btn');
       if (btn) openHistoryModal(btn.dataset.row);
+    });
+    el.addEventListener('change', async (e) => {
+      const fileInput = e.target;
+      if (!fileInput.matches('.photo-file-input')) return;
+      const file = fileInput.files[0];
+      fileInput.value = '';
+      if (!file) return;
+      const rowId = fileInput.dataset.row;
+      const type = fileInput.dataset.type;
+      try {
+        await savePhoto(state.currentPeriod, rowId, type, file);
+        photoKeys.add(`${rowId}_${type}`);
+        renderTable();
+        toast('拍照存證完成，可以輸入本月度數了');
+      } catch (err) {
+        toast('拍照存證失敗，請再試一次');
+      }
     });
   });
 
@@ -889,10 +985,12 @@ function setHandlers() {
 
 /* ---------------- 啟動 ---------------- */
 
-function bootstrap() {
+async function bootstrap() {
   state = loadState();
   ensureReadingSlots();
   setHandlers();
+  applyRolePermissions();
+  await loadPhotoKeys();
   renderAll();
 }
 

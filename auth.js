@@ -17,6 +17,10 @@ const ADMIN_USERNAME = 'wu8858009';
 
 let currentUser = null; // { username, role }
 
+function isAdmin() {
+  return !!currentUser && currentUser.role === 'admin';
+}
+
 async function sha256Hex(text) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
   return Array.from(new Uint8Array(buf))
@@ -185,7 +189,7 @@ function renderUserApprovalList() {
 
   rows.forEach((row) => {
     const tr = document.createElement('tr');
-    const roleLabel = row.role === 'admin' ? '管理員' : '一般員工';
+    const roleLabel = row.role === 'admin' ? '管理員' : '抄表員';
     const actions = [];
     if (row.role !== 'admin') {
       if (row.status === 'pending') {
@@ -274,6 +278,7 @@ async function initGate() {
     return;
   }
 
+  showLoginView();
   document.getElementById('loginUsername').focus();
 }
 

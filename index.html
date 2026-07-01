@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>碧潭商店街 抄表管理系統 - Enterprise PRO</title>
+    <title>碧潭商店街 抄表管理系統</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -33,7 +33,7 @@
 
     <div class="login-gate" id="registerGate" style="display: none">
       <form class="login-box" id="registerForm">
-        <div class="login-title">註冊新帳號</div>
+        <div class="login-title">註冊新帳號（抄表員）</div>
         <div class="login-sub">送出後需等待管理員審核通過才能登入</div>
         <input type="text" id="registerUsername" placeholder="帳號" autocomplete="off" />
         <input type="password" id="registerPassword" placeholder="密碼（至少 6 碼）" autocomplete="off" />
@@ -50,7 +50,7 @@
       <div>
         <div class="brand">
           <h1>碧潭商店街 抄表管理系統</h1>
-          <span class="badge-pro">ENTERPRISE PRO</span>
+          <span class="badge-pro">商店街版</span>
         </div>
         <div class="brand-sub">水電瓦斯抄表・自動計算用量與金額・多期別歷史查詢</div>
       </div>
@@ -131,7 +131,7 @@
     <div class="card-list" id="cardList"></div>
 
     <div class="footnote">
-      提醒：初始資料由紙本表格轉檔而成，正式使用前請於「管理抄表項目」逐筆核對錶號與度數；所有資料僅儲存於本機瀏覽器（localStorage），建議定期使用「備份匯出」保存 JSON 檔以防資料遺失。
+      提醒：初始資料由紙本表格轉檔而成，正式使用前請於「管理抄表項目」逐筆核對錶號與度數；抄表資料僅儲存於本機瀏覽器（localStorage），拍照存證的照片存於本機瀏覽器（IndexedDB），皆只存在拍攝/填寫當下那台裝置上；建議定期使用「備份匯出」保存 JSON 檔以防抄表資料遺失（照片目前不包含在備份內）。
     </div>
 
     <!-- 單價設定 modal -->
@@ -194,6 +194,7 @@
     </div>
 
     <script src="data.js"></script>
+    <script src="photos.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
   </body>
