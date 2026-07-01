@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>碧潭商店街 抄表管理系統 - Enterprise PRO</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="login-gate" id="loginGate">
+      <form class="login-box" id="loginForm">
+        <div class="login-title">碧潭商店街 抄表管理系統</div>
+        <div class="login-sub">請輸入帳號密碼</div>
+        <input type="text" id="loginUsername" placeholder="帳號" autocomplete="off" />
+        <input type="password" id="loginPassword" placeholder="密碼" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">登入</button>
+        <div class="login-error" id="loginError"></div>
+        <button type="button" class="link-btn" id="btnShowRegister">還沒有帳號？點此註冊</button>
+      </form>
+    </div>
+
+    <div class="login-gate" id="registerGate" style="display: none">
+      <form class="login-box" id="registerForm">
+        <div class="login-title">註冊新帳號</div>
+        <div class="login-sub">送出後需等待管理員審核通過才能登入</div>
+        <input type="text" id="registerUsername" placeholder="帳號" autocomplete="off" />
+        <input type="password" id="registerPassword" placeholder="密碼（至少 6 碼）" autocomplete="off" />
+        <input type="password" id="registerPasswordConfirm" placeholder="確認密碼" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">送出註冊申請</button>
+        <div class="login-error" id="registerError"></div>
+        <div class="login-success" id="registerSuccess"></div>
+        <button type="button" class="link-btn" id="btnShowLogin">返回登入</button>
+      </form>
+    </div>
+
+    <div id="appRoot" style="display: none">
+    <header class="app-header">
+      <div>
+        <div class="brand">
+          <h1>碧潭商店街 抄表管理系統</h1>
+          <span class="badge-pro">ENTERPRISE PRO</span>
+        </div>
+        <div class="brand-sub">水電瓦斯抄表・自動計算用量與金額・多期別歷史查詢</div>
+      </div>
+      <div class="period-controls">
+        <label>期別</label>
+        <select id="periodSelect"></select>
+        <label>抄表日</label>
+        <input type="date" id="readingDateInput" />
+        <button class="btn btn-gold" id="btnNextPeriod" type="button">建立下一期</button>
+      </div>
+      <div class="account-controls">
+        <span id="currentUserLabel"></span>
+        <button class="btn" id="btnUserApproval" type="button" style="display: none">帳號審核</button>
+        <button class="btn" id="btnLogout" type="button">登出</button>
+      </div>
+    </header>
+
+    <section class="stat-grid">
+      <div class="stat-card warn">
+        <div class="stat-label">本期未填筆數</div>
+        <div class="stat-value" id="statUnfilled">-</div>
+      </div>
+      <div class="stat-card error">
+        <div class="stat-label">異常提醒（度數倒退／用量偏高）</div>
+        <div class="stat-value" id="statAnomaly">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">本期總用量</div>
+        <div class="stat-value small" id="statUsage">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">本期估算總金額</div>
+        <div class="stat-value" id="statCost">-</div>
+      </div>
+    </section>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-box" placeholder="搜尋門市代號 / 名稱" />
+      <div class="view-tabs">
+        <button type="button" class="view-tab active" data-view="all">全部</button>
+        <button type="button" class="view-tab" data-view="water">水錶</button>
+        <button type="button" class="view-tab" data-view="electric">電錶</button>
+        <button type="button" class="view-tab" data-view="gas">瓦斯</button>
+      </div>
+      <div class="filter-chips">
+        <button type="button" class="filter-chip active" data-filter="all">全部</button>
+        <button type="button" class="filter-chip" data-filter="unfilled">未填</button>
+        <button type="button" class="filter-chip" data-filter="anomaly">異常</button>
+      </div>
+      <div class="toolbar-spacer"></div>
+      <div class="toolbar-actions">
+        <button class="btn" id="btnPrice" type="button">單價設定</button>
+        <button class="btn" id="btnManage" type="button">管理抄表項目</button>
+        <button class="btn" id="btnExportCsv" type="button">匯出 CSV</button>
+        <button class="btn" id="btnExportExcel" type="button">匯出 Excel</button>
+        <button class="btn" id="btnPrint" type="button">列印</button>
+        <button class="btn" id="btnBackupExport" type="button">備份匯出</button>
+        <button class="btn" id="btnBackupImport" type="button">還原備份</button>
+        <input type="file" id="backupFileInput" accept="application/json" hidden />
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><span class="legend-swatch" style="background:#eaf3fb"></span>已填上月度數</span>
+      <span><span class="legend-swatch" style="background:#fff7e0"></span>本月度數待填</span>
+      <span><span class="legend-swatch" style="background:#fde2e1"></span>度數異常（本月低於上月）</span>
+      <span><span class="legend-swatch" style="background:#ffedd5"></span>用量偏高（超過歷史平均 2.5 倍）</span>
+      <span><span class="legend-swatch" style="background:repeating-linear-gradient(45deg,#f2f2f2,#f2f2f2 4px,#e6e6e6 4px,#e6e6e6 8px)"></span>無此類型錶</span>
+    </div>
+
+    <div class="table-wrap">
+      <table class="meter-table" id="meterTable">
+        <thead id="tableHead"></thead>
+        <tbody id="tableBody"></tbody>
+        <tfoot id="tableFoot"></tfoot>
+      </table>
+    </div>
+
+    <div class="card-list" id="cardList"></div>
+
+    <div class="footnote">
+      提醒：初始資料由紙本表格轉檔而成，正式使用前請於「管理抄表項目」逐筆核對錶號與度數；所有資料僅儲存於本機瀏覽器（localStorage），建議定期使用「備份匯出」保存 JSON 檔以防資料遺失。
+    </div>
+
+    <!-- 單價設定 modal -->
+    <div class="modal-overlay" id="priceModal">
+      <div class="modal">
+        <div class="modal-header">單價設定（用於估算金額）</div>
+        <div class="modal-body">
+          <div class="form-row"><label>水費／度</label><input type="text" inputmode="decimal" id="priceWater" /></div>
+          <div class="form-row"><label>電費／度</label><input type="text" inputmode="decimal" id="priceElectric" /></div>
+          <div class="form-row"><label>瓦斯／KG</label><input type="text" inputmode="decimal" id="priceGas" /></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="btnPriceCancel" type="button">取消</button>
+          <button class="btn btn-primary" id="btnPriceSave" type="button">儲存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 管理抄表項目 modal -->
+    <div class="modal-overlay" id="manageModal">
+      <div class="modal wide">
+        <div class="modal-header">管理抄表項目</div>
+        <div class="modal-body">
+          <div class="manage-toolbar">
+            <button class="btn" id="btnManageAdd" type="button">新增項目</button>
+          </div>
+          <div id="manageTableWrap"></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="btnManageCancel" type="button">取消</button>
+          <button class="btn btn-primary" id="btnManageSave" type="button">儲存變更</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 帳號審核 modal -->
+    <div class="modal-overlay" id="userApprovalModal">
+      <div class="modal wide">
+        <div class="modal-header">帳號審核</div>
+        <div class="modal-body" id="userApprovalTableWrap"></div>
+        <div class="modal-footer">
+          <button class="btn" id="btnUserApprovalClose" type="button">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 歷史紀錄 modal -->
+    <div class="modal-overlay" id="historyModal">
+      <div class="modal wide">
+        <div class="modal-header" id="historyTitle">歷史紀錄</div>
+        <div class="modal-body" id="historyTableWrap"></div>
+        <div class="modal-footer">
+          <button class="btn" id="btnHistoryClose" type="button">關閉</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast"></div>
+
+    </div>
+
+    <script src="data.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
