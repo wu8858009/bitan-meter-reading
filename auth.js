@@ -226,9 +226,27 @@ function renderUserApprovalList() {
   });
 }
 
+/* ---------------- 表單體驗：按 Enter 跳到下一個欄位 ---------------- */
+
+function focusNextOnEnter(inputIds) {
+  const inputs = inputIds.map((id) => document.getElementById(id));
+  inputs.forEach((input, idx) => {
+    if (idx === inputs.length - 1) return; // 最後一個欄位讓 Enter 照常送出表單
+    input.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      inputs[idx + 1].focus();
+    });
+  });
+}
+
 /* ---------------- 初始化（含頁面重新整理時還原 session） ---------------- */
 
 async function initGate() {
+  focusNextOnEnter(['setupPassword', 'setupPasswordConfirm']);
+  focusNextOnEnter(['loginUsername', 'loginPassword']);
+  focusNextOnEnter(['registerUsername', 'registerPassword', 'registerPasswordConfirm']);
+
   document.getElementById('setupForm').addEventListener('submit', (e) => {
     e.preventDefault();
     const password = document.getElementById('setupPassword').value;
