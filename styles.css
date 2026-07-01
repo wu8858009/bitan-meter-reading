@@ -381,12 +381,6 @@ button {
 .card-name.label-blue { color: #1d4ed8; font-weight: 800; }
 .card-name.label-cyan { color: #0e8a9c; font-weight: 800; }
 
-.card-meter + .card-meter {
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px dashed var(--border);
-}
-
 .card-meter-label {
   font-size: 12px;
   font-weight: 800;

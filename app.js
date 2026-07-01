@@ -320,8 +320,9 @@ function meterCardBlock(row, type) {
     </div>`;
 }
 
-function cardBodyHtml(row, view) {
-  const types = view === 'all' ? ['water', 'electric', 'gas'] : [view];
+function cardHtmlForType(row, type) {
+  const block = meterCardBlock(row, type);
+  if (!block) return '';
   const nameColorClass = row.labelColor ? `label-${row.labelColor}` : '';
   return `
     <div class="card-head">
@@ -331,7 +332,7 @@ function cardBodyHtml(row, view) {
       </div>
       <button type="button" class="link-btn history-btn" data-row="${row.id}" title="歷史紀錄">歷程</button>
     </div>
-    ${types.map((t) => meterCardBlock(row, t)).join('')}`;
+    ${block}`;
 }
 
 function renderTableHead(view) {
@@ -404,10 +405,15 @@ function renderTable() {
     `;
     tbody.appendChild(tr);
 
-    const card = document.createElement('div');
-    card.className = 'meter-card';
-    card.innerHTML = cardBodyHtml(row, meterView);
-    cardList.appendChild(card);
+    const cardTypes = meterView === 'all' ? ['water', 'electric', 'gas'] : [meterView];
+    cardTypes.forEach((type) => {
+      const html = cardHtmlForType(row, type);
+      if (!html) return;
+      const card = document.createElement('div');
+      card.className = 'meter-card';
+      card.innerHTML = html;
+      cardList.appendChild(card);
+    });
   });
 
   if (!matchCount) {
