@@ -896,6 +896,6 @@ function bootstrap() {
 }
 
 /*
-  登入 / 註冊 / 帳號審核邏輯已移至 auth.js（改用 Firebase Authentication + Firestore，
-  讓不同裝置都能看到並審核註冊申請）。unlockApp() 由 auth.js 在核准後呼叫。
+  登入 / 註冊 / 帳號審核邏輯已移至 auth.js（帳號資料存在瀏覽器本機 localStorage，
+  不需要任何雲端服務設定）。unlockApp() 由 auth.js 在核准後呼叫。
 */

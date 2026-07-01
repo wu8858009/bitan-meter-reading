@@ -8,7 +8,18 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="login-gate" id="loginGate">
+    <div class="login-gate" id="setupGate" style="display: none">
+      <form class="login-box" id="setupForm">
+        <div class="login-title">首次啟動：設定管理員密碼</div>
+        <div class="login-sub">管理員帳號固定為 wu8858009，請自行設定一組密碼（僅存於此瀏覽器）</div>
+        <input type="password" id="setupPassword" placeholder="設定密碼（至少 6 碼）" autocomplete="off" />
+        <input type="password" id="setupPasswordConfirm" placeholder="確認密碼" autocomplete="off" />
+        <button type="submit" class="btn btn-primary">建立管理員帳號</button>
+        <div class="login-error" id="setupError"></div>
+      </form>
+    </div>
+
+    <div class="login-gate" id="loginGate" style="display: none">
       <form class="login-box" id="loginForm">
         <div class="login-title">碧潭商店街 抄表管理系統</div>
         <div class="login-sub">請輸入帳號密碼</div>
@@ -184,10 +195,6 @@
     </div>
 
     <script src="data.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
     <script src="auth.js"></script>
     <script src="app.js"></script>
   </body>
