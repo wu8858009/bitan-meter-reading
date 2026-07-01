@@ -29,7 +29,17 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   background: var(--bg);
   color: var(--text);
+  -webkit-font-smoothing: antialiased;
 }
+
+/* 桌面版表格捲動區塊的細滾動軸（Chrome/Edge），質感用 */
+.table-wrap::-webkit-scrollbar { height: 10px; }
+.table-wrap::-webkit-scrollbar-track { background: transparent; }
+.table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(181, 85, 58, 0.35);
+  border-radius: 999px;
+}
+.table-wrap::-webkit-scrollbar-thumb:hover { background: rgba(181, 85, 58, 0.55); }
 
 /* ---------- Login gate ---------- */
 
@@ -76,6 +86,13 @@ body {
   font-size: 16px;
   text-align: center;
   margin-bottom: 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.login-box input[type="text"]:focus,
+.login-box input[type="password"]:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(181, 85, 58, 0.15);
 }
 
 .login-box .btn {
@@ -109,6 +126,9 @@ body {
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
+  box-shadow: 0 4px 14px rgba(90, 55, 30, 0.22);
+  position: relative;
+  z-index: 10;
 }
 
 .brand {
@@ -184,14 +204,17 @@ button {
 
 .btn {
   padding: 8px 14px;
-  border-radius: 8px;
+  border-radius: 9px;
   border: 1px solid var(--border);
   background: #fff;
   color: var(--text);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 1px 3px rgba(90, 55, 30, 0.06);
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
 }
-.btn:hover { background: #f0f3f7; }
+.btn:hover { background: #fbf3ea; box-shadow: 0 2px 8px rgba(90, 55, 30, 0.12); }
+.btn:active { transform: translateY(1px) scale(0.98); box-shadow: 0 1px 2px rgba(90, 55, 30, 0.1); }
 
 .btn-primary {
   background: var(--navy);
@@ -238,6 +261,8 @@ button {
 .stat-card {
   background: #fffaf5;
   border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-left-color: var(--navy);
   border-radius: 14px;
   padding: 12px 14px;
   box-shadow: 0 2px 8px rgba(120, 72, 44, 0.06);
@@ -257,6 +282,8 @@ button {
 
 .stat-value.small { font-size: 13px; font-weight: 700; }
 
+.stat-card.warn { border-left-color: var(--warn); }
+.stat-card.error { border-left-color: var(--error); }
 .stat-card.warn .stat-value { color: var(--warn); }
 .stat-card.error .stat-value { color: var(--error); }
 
@@ -272,11 +299,17 @@ button {
 
 .search-box {
   padding: 8px 12px;
-  border-radius: 8px;
+  border-radius: 9px;
   border: 1px solid var(--border);
   font-size: 16px;
   min-width: 180px;
   background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.search-box:focus {
+  outline: none;
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(181, 85, 58, 0.15);
 }
 
 .filter-chips, .toolbar-actions {
@@ -292,7 +325,9 @@ button {
   font-size: 12px;
   font-weight: 600;
   color: var(--muted);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
+.filter-chip:hover { border-color: var(--navy); color: var(--navy); }
 .filter-chip.active {
   background: var(--navy);
   border-color: var(--navy);
@@ -475,6 +510,11 @@ tr.band-b .sticky-col { background: #ffffff; }
 tr.band-a td { background: #fbfbfd; }
 tr.band-b td { background: #ffffff; }
 
+table.meter-table tbody tr:hover td,
+table.meter-table tbody tr:hover .sticky-col {
+  background: var(--blue-tint);
+}
+
 .row-name { font-weight: 600; }
 .label-blue .row-name { color: #1d4ed8; font-weight: 800; }
 .label-cyan .row-name { color: #0e8a9c; font-weight: 800; }
@@ -499,7 +539,8 @@ tr.band-b td { background: #ffffff; }
   color: var(--text);
 }
 .cell-input:focus {
-  outline: 2px solid var(--navy-2);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--navy-2);
   background: #fff;
 }
 .cell-input:read-only {
@@ -579,14 +620,16 @@ tfoot .sticky-col { background: var(--navy); color: #fff; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 42, 74, 0.55);
+  background: rgba(58, 38, 26, 0.55);
   display: none;
   align-items: center;
   justify-content: center;
   z-index: 50;
   padding: 20px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
 }
-.modal-overlay.open { display: flex; }
+.modal-overlay.open { display: flex; opacity: 1; }
 
 .modal {
   background: #fff;
@@ -597,6 +640,9 @@ tfoot .sticky-col { background: var(--navy); color: #fff; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  box-shadow: 0 24px 60px rgba(58, 38, 26, 0.35);
+  transform: translateY(0);
+  transition: transform 0.15s ease;
 }
 .modal.wide { max-width: 1100px; }
 
@@ -673,6 +719,7 @@ table.history-table th { background: var(--navy); color: #fff; }
   pointer-events: none;
   transition: all 0.25s ease;
   z-index: 100;
+  box-shadow: 0 10px 30px rgba(58, 38, 26, 0.35);
 }
 #toast.show {
   opacity: 1;
@@ -744,7 +791,9 @@ table.history-table th { background: var(--navy); color: #fff; }
     padding: 8px 4px;
     font-size: 12px;
     font-weight: 800;
+    transition: transform 0.08s ease, background-color 0.15s ease;
   }
+  .type-nav-btn:active { transform: scale(0.96); }
   .type-nav-btn.type-water { color: var(--type-water); border-color: var(--type-water); }
   .type-nav-btn.type-electric { color: var(--type-electric); border-color: var(--type-electric); }
   .type-nav-btn.type-gas { color: var(--type-gas); border-color: var(--type-gas); }
@@ -752,6 +801,8 @@ table.history-table th { background: var(--navy); color: #fff; }
   .photo-control { justify-content: flex-start; margin-bottom: 6px; }
   .btn-photo { padding: 6px 10px; font-size: 11px; }
   .photo-thumb { width: 28px; height: 28px; }
+
+  #toast { bottom: calc(24px + 56px + env(safe-area-inset-bottom, 0px)); }
 
   .modal { max-width: 100%; max-height: 94vh; border-radius: 12px; }
   .modal.wide { max-width: 100%; }
