@@ -49,12 +49,14 @@ function showSetupView() {
   document.getElementById('loginGate').style.display = 'none';
   document.getElementById('registerGate').style.display = 'none';
   document.getElementById('setupGate').style.display = 'flex';
+  document.getElementById('setupPassword').focus();
 }
 
 function showLoginView() {
   document.getElementById('setupGate').style.display = 'none';
   document.getElementById('registerGate').style.display = 'none';
   document.getElementById('loginGate').style.display = 'flex';
+  document.getElementById('loginUsername').focus();
 }
 
 function showRegisterView() {
@@ -62,6 +64,7 @@ function showRegisterView() {
   document.getElementById('registerGate').style.display = 'flex';
   document.getElementById('registerError').textContent = '';
   document.getElementById('registerSuccess').textContent = '';
+  document.getElementById('registerUsername').focus();
 }
 
 async function handleSetupAdmin(password, passwordConfirm) {
@@ -292,12 +295,10 @@ async function initGate() {
 
   if (loadUsers().length === 0) {
     showSetupView();
-    document.getElementById('setupPassword').focus();
     return;
   }
 
   showLoginView();
-  document.getElementById('loginUsername').focus();
 }
 
 document.addEventListener('DOMContentLoaded', initGate);
