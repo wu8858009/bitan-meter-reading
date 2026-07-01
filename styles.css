@@ -855,12 +855,31 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
 
   #toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom, 0px)); }
 
-  .modal { max-width: 100%; max-height: 94vh; border-radius: 12px; }
+  .modal-overlay { padding: 10px; }
+  .modal { max-width: 100%; max-height: 96vh; border-radius: 12px; }
   .modal.wide { max-width: 100%; }
+  .modal-header { padding: 12px 14px; font-size: 14px; }
+  .modal-body { padding: 12px; }
+  .modal-footer { padding: 10px 12px; flex-wrap: wrap; }
+  .modal-footer .btn { flex: 1; }
   .form-row { flex-wrap: wrap; }
   .form-row label { width: 100%; }
   .form-row input { width: 100%; }
-  table.manage-table, table.history-table { font-size: 11px; }
+
+  /* 管理抄表項目／歷史紀錄的表格欄位較多，手機螢幕放不下，
+     改成表格本身維持可讀寬度、外層橫向捲動，而不是把欄位擠到看不清楚 */
+  #manageTableWrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 0 -12px;
+    padding: 0 12px;
+  }
+  #historyTableWrap { -webkit-overflow-scrolling: touch; }
+  table.manage-table { width: auto; min-width: 640px; font-size: 12px; }
+  table.history-table { width: auto; min-width: 480px; font-size: 11px; }
+  .mg-check input[type="checkbox"] { width: 20px; height: 20px; }
+  .manage-toolbar { flex-wrap: wrap; gap: 8px; }
+  .manage-toolbar .btn { flex: 1; }
 }
 
 /* ---------- Print ---------- */
