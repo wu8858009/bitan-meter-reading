@@ -5,6 +5,7 @@
 
 const STORAGE_KEY = 'bpt_meter_state_v2';
 const SPIKE_RATIO = 2.5; // 用量超過歷史平均的倍數視為異常偏高
+const ROLLOVER_MAX = { water: 10000, electric: 100000, gas: 100000 }; // 錶歸零進位上限（水表4位、電表5位）
 
 let state = null;
 let currentFilter = 'all'; // all | unfilled | anomaly
@@ -203,7 +204,19 @@ function cellStatus(row, type) {
   const usage = computeUsage(reading.last, reading.this);
 
   if (reading.this === null) return { status: 'unfilled', reading, usage };
-  if (usage !== null && usage < 0) return { status: 'negative', reading, usage };
+  if (usage !== null && usage < 0) {
+    // 本月度數小於上月度數：先檢查是否為錶歸零進位（本月度數看起來像剛歸零重新起算的原始錶面讀數），
+    // 而不是直接當成資料異常。若像進位，顯示提醒讓使用者人工確認後套用修正值。
+    const rolloverMax = ROLLOVER_MAX[type];
+    if (rolloverMax && reading.this < rolloverMax) {
+      // 進位次數：足以讓修正後的度數大於上月度數（通常是 1 次，但上月度數若已經
+      // 是先前修正過的大數字，可能需要多次進位才會追上）
+      const cycles = Math.floor(reading.last / rolloverMax) + 1;
+      const correctedThis = reading.this + cycles * rolloverMax;
+      return { status: 'rollover', reading, usage: correctedThis - reading.last, correctedThis };
+    }
+    return { status: 'negative', reading, usage };
+  }
 
   const avg = historicalAvgUsage(row.id, type, period);
   if (avg !== null && avg > 0 && usage !== null && usage > avg * SPIKE_RATIO) {
@@ -226,7 +239,7 @@ function renderStats() {
       if (!hasMeter(row[type])) return;
       const st = cellStatus(row, type);
       if (st.status === 'unfilled') unfilled++;
-      if (st.status === 'negative' || st.status === 'spike') anomaly++;
+      if (st.status === 'negative' || st.status === 'spike' || st.status === 'rollover') anomaly++;
       if (st.usage !== null && st.usage !== undefined) {
         totals[type] += st.usage;
         const cost = computeCost(type, st.usage);
@@ -264,7 +277,7 @@ function rowMatchesFilter(row) {
     return types.some((t) => cellStatus(row, t).status === 'unfilled');
   }
   if (currentFilter === 'anomaly') {
-    return types.some((t) => ['negative', 'spike'].includes(cellStatus(row, t).status));
+    return types.some((t) => ['negative', 'spike', 'rollover'].includes(cellStatus(row, t).status));
   }
   return true;
 }
@@ -279,7 +292,7 @@ function cardMatchesFilter(row, type) {
   if (currentFilter === 'all') return true;
   const status = cellStatus(row, type).status;
   if (currentFilter === 'unfilled') return status === 'unfilled';
-  if (currentFilter === 'anomaly') return status === 'negative' || status === 'spike';
+  if (currentFilter === 'anomaly') return status === 'negative' || status === 'spike' || status === 'rollover';
   return true;
 }
 
@@ -287,15 +300,20 @@ function statusClassOf(status) {
   if (status === 'unfilled') return 'cell-unfilled';
   if (status === 'negative') return 'cell-negative';
   if (status === 'spike') return 'cell-spike';
+  if (status === 'rollover') return 'cell-rollover';
   return '';
 }
 
-function usageInnerHtml(st, cost) {
+function usageInnerHtml(st, cost, rowId, type) {
   return `
       <div class="usage-val">${st.usage === null ? '-' : fmtNum(st.usage)}</div>
       ${cost !== null ? `<div class="cost-val">NT$ ${fmtMoney(cost)}</div>` : ''}
       ${st.status === 'spike' ? '<div class="badge-warn">用量偏高</div>' : ''}
       ${st.status === 'negative' ? '<div class="badge-error">度數異常</div>' : ''}
+      ${st.status === 'rollover' ? `
+        <div class="badge-rollover">⚠ 疑似錶歸零進位</div>
+        <button type="button" class="btn-apply-rollover" data-row="${rowId}" data-type="${type}" data-corrected="${st.correctedThis}">套用進位（→${fmtNum(st.correctedThis)}）</button>
+      ` : ''}
   `;
 }
 
@@ -334,7 +352,7 @@ function meterCellHtml(row, type) {
         placeholder="${hasPhoto ? '待填' : '請先拍照'}" ${hasPhoto ? '' : 'disabled'}
         data-row="${row.id}" data-type="${type}" data-field="this" />
     </td>
-    <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost)}</td>`;
+    <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</td>`;
 }
 
 function meterCardBlock(row, type) {
@@ -379,7 +397,7 @@ function meterCardBlock(row, type) {
             data-row="${row.id}" data-type="${type}" data-field="this" />
         </div>
       </div>
-      <div class="card-usage usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost)}</div>
+      <div class="card-usage usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</div>
     </div>`;
 }
 
@@ -566,6 +584,23 @@ async function createNextPeriod() {
   toast(`已建立 ${periodLabel(next)}，上月度數已自動帶入`);
 }
 
+/* ---------------- 進位補正 ---------------- */
+
+function applyRolloverCorrection(rowId, type) {
+  const row = state.rows.find((r) => r.id === rowId);
+  if (!row) return;
+  const st = cellStatus(row, type);
+  if (st.status !== 'rollover') return; // 畫面重繪後狀態可能已改變，避免套用到過期的修正值
+
+  const reading = state.periods[state.currentPeriod].readings[rowId][type];
+  reading.this = st.correctedThis;
+  saveState();
+  refreshRowDisplay(row, null);
+  renderStats();
+  renderFooterTotals();
+  toast(`已套用進位補正，本月度數更新為 ${fmtNum(st.correctedThis)}`);
+}
+
 /* ---------------- 事件處理：表格輸入 ---------------- */
 
 function handleTableInput(e) {
@@ -612,12 +647,12 @@ function refreshRowDisplay(row, activeInput) {
     });
 
     document.querySelectorAll(`.field-this[data-row="${row.id}"][data-type="${type}"], .usage-display[data-row="${row.id}"][data-type="${type}"]`).forEach((el) => {
-      el.classList.remove('cell-unfilled', 'cell-negative', 'cell-spike');
+      el.classList.remove('cell-unfilled', 'cell-negative', 'cell-spike', 'cell-rollover');
       if (statusClass) el.classList.add(statusClass);
     });
 
     document.querySelectorAll(`.usage-display[data-row="${row.id}"][data-type="${type}"]`).forEach((el) => {
-      el.innerHTML = usageInnerHtml(st, cost);
+      el.innerHTML = usageInnerHtml(st, cost, row.id, type);
     });
   });
 }
@@ -901,6 +936,11 @@ function setHandlers() {
           `.photo-file-input[data-row="${photoBtn.dataset.row}"][data-type="${photoBtn.dataset.type}"]`
         );
         if (fileInput) fileInput.click();
+        return;
+      }
+      const rolloverBtn = e.target.closest('.btn-apply-rollover');
+      if (rolloverBtn) {
+        applyRolloverCorrection(rolloverBtn.dataset.row, rolloverBtn.dataset.type);
         return;
       }
       const btn = e.target.closest('.history-btn');

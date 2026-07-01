@@ -16,6 +16,7 @@
   --warn: #f59e0b;
   --error: #ef4444;
   --ok: #10b981;
+  --rollover: #a78bfa;
   --bg: #0b0f19;
   --panel: rgba(15, 23, 42, 0.75);
   --type-water: #38bdf8;
@@ -514,6 +515,7 @@ button {
 .card-field.field-this.cell-unfilled input { background: rgba(245, 158, 11, 0.15); }
 .card-field.field-this.cell-negative input { background: rgba(239, 68, 68, 0.15); }
 .card-field.field-this.cell-spike input { background: rgba(251, 146, 60, 0.15); }
+.card-field.field-this.cell-rollover input { background: rgba(167, 139, 250, 0.18); }
 
 .card-usage {
   margin-top: 8px;
@@ -525,6 +527,7 @@ button {
 .card-usage .usage-val { font-weight: 800; font-size: 15px; }
 .card-usage.cell-negative .usage-val { color: var(--error); }
 .card-usage.cell-spike .usage-val { color: var(--warn); }
+.card-usage.cell-rollover .usage-val { color: var(--rollover); }
 
 table.meter-table {
   border-collapse: collapse;
@@ -649,15 +652,17 @@ table.meter-table tbody tr:hover .sticky-col {
 .this-cell.cell-unfilled { background: rgba(245, 158, 11, 0.12); }
 .this-cell.cell-negative { background: rgba(239, 68, 68, 0.14); }
 .this-cell.cell-spike { background: rgba(251, 146, 60, 0.14); }
+.this-cell.cell-rollover { background: rgba(167, 139, 250, 0.16); }
 
 .usage-cell { min-width: 78px; }
 .usage-cell.cell-unfilled { background: rgba(245, 158, 11, 0.12); }
 .usage-cell.cell-negative { background: rgba(239, 68, 68, 0.14); }
 .usage-cell.cell-spike { background: rgba(251, 146, 60, 0.14); }
+.usage-cell.cell-rollover { background: rgba(167, 139, 250, 0.16); }
 
 .usage-val { font-weight: 800; }
 .cost-val { font-size: 10.5px; color: var(--muted); }
-.badge-warn, .badge-error {
+.badge-warn, .badge-error, .badge-rollover {
   font-size: 9.5px;
   font-weight: 800;
   border-radius: 4px;
@@ -667,6 +672,22 @@ table.meter-table tbody tr:hover .sticky-col {
 }
 .badge-warn { background: rgba(245, 158, 11, 0.2); color: #fcd34d; }
 .badge-error { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+.badge-rollover { background: rgba(167, 139, 250, 0.2); color: var(--rollover); }
+
+.btn-apply-rollover {
+  display: block;
+  margin-top: 3px;
+  border: 1px solid var(--rollover);
+  background: rgba(167, 139, 250, 0.12);
+  color: var(--rollover);
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background-color 0.15s ease;
+}
+.btn-apply-rollover:hover { background: rgba(167, 139, 250, 0.25); }
 
 tfoot td {
   background: var(--navy);
@@ -905,6 +926,8 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
   .photo-control { justify-content: flex-start; margin-bottom: 6px; }
   .btn-photo { padding: 6px 10px; font-size: 11px; }
   .photo-thumb { width: 28px; height: 28px; }
+  .badge-rollover, .btn-apply-rollover { font-size: 11px; }
+  .btn-apply-rollover { padding: 5px 10px; }
 
   #toast { bottom: calc(24px + 64px + env(safe-area-inset-bottom, 0px)); }
 
