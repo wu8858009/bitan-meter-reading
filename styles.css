@@ -820,6 +820,12 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
     padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)) 8px;
     border-top: 1px solid var(--border);
     box-shadow: 0 -4px 16px rgba(90, 55, 30, 0.14);
+    /* 部分手機瀏覽器（尤其 iOS Safari）在捲動時，position:fixed 元素
+       若沒有獨立的合成層，畫面會出現跟著捲動漂移/延遲貼齊的現象，
+       強制建立獨立合成層可以讓底部導覽列在捲動時穩定貼齊畫面下緣。 */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    will-change: transform;
   }
   .type-nav-btn {
     flex: 1;
