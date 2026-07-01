@@ -10,6 +10,7 @@
   <body>
     <div class="login-gate" id="setupGate" style="display: none">
       <form class="login-box" id="setupForm">
+        <div class="login-mark">📋</div>
         <div class="login-title">首次啟動：設定管理員密碼</div>
         <div class="login-sub">管理員帳號固定為 wu8858009，請自行設定一組密碼（僅存於此瀏覽器）</div>
         <input type="password" id="setupPassword" placeholder="設定密碼（至少 6 碼）" autocomplete="off" />
@@ -21,6 +22,7 @@
 
     <div class="login-gate" id="loginGate" style="display: none">
       <form class="login-box" id="loginForm">
+        <div class="login-mark">📋</div>
         <div class="login-title">碧潭商店街 抄表管理系統</div>
         <div class="login-sub">請輸入帳號密碼</div>
         <input type="text" id="loginUsername" placeholder="帳號" autocomplete="off" />
@@ -33,6 +35,7 @@
 
     <div class="login-gate" id="registerGate" style="display: none">
       <form class="login-box" id="registerForm">
+        <div class="login-mark">📋</div>
         <div class="login-title">註冊新帳號（抄表員）</div>
         <div class="login-sub">送出後需等待管理員審核通過才能登入</div>
         <input type="text" id="registerUsername" placeholder="帳號" autocomplete="off" />
@@ -59,12 +62,12 @@
         <select id="periodSelect"></select>
         <label>抄表日</label>
         <input type="date" id="readingDateInput" />
-        <button class="btn btn-gold" id="btnNextPeriod" type="button">建立下一期</button>
+        <button class="btn btn-gold" id="btnNextPeriod" type="button">➕ 建立下一期</button>
       </div>
       <div class="account-controls">
         <span id="currentUserLabel"></span>
-        <button class="btn" id="btnUserApproval" type="button" style="display: none">帳號審核</button>
-        <button class="btn" id="btnLogout" type="button">登出</button>
+        <button class="btn" id="btnUserApproval" type="button" style="display: none">👤 帳號審核</button>
+        <button class="btn" id="btnLogout" type="button">🚪 登出</button>
       </div>
     </header>
 
@@ -96,13 +99,13 @@
       </div>
       <div class="toolbar-spacer"></div>
       <div class="toolbar-actions">
-        <button class="btn" id="btnPrice" type="button">單價設定</button>
-        <button class="btn" id="btnManage" type="button">管理抄表項目</button>
-        <button class="btn" id="btnExportCsv" type="button">匯出 CSV</button>
-        <button class="btn" id="btnExportExcel" type="button">匯出 Excel</button>
-        <button class="btn" id="btnPrint" type="button">列印</button>
-        <button class="btn" id="btnBackupExport" type="button">備份匯出</button>
-        <button class="btn" id="btnBackupImport" type="button">還原備份</button>
+        <button class="btn" id="btnPrice" type="button">💰 單價設定</button>
+        <button class="btn" id="btnManage" type="button">🗂️ 管理抄表項目</button>
+        <button class="btn" id="btnExportCsv" type="button">📄 匯出 CSV</button>
+        <button class="btn" id="btnExportExcel" type="button">📊 匯出 Excel</button>
+        <button class="btn" id="btnPrint" type="button">🖨️ 列印</button>
+        <button class="btn" id="btnBackupExport" type="button">💾 備份匯出</button>
+        <button class="btn" id="btnBackupImport" type="button">📥 還原備份</button>
         <input type="file" id="backupFileInput" accept="application/json" hidden />
       </div>
     </div>

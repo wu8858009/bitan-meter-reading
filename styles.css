@@ -64,6 +64,19 @@ body {
   box-shadow: 0 20px 50px rgba(90, 55, 30, 0.28);
 }
 
+.login-mark {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 14px auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--navy), var(--navy-2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 6px 16px rgba(90, 55, 30, 0.25);
+}
+
 .login-title {
   font-size: 16px;
   font-weight: 800;
@@ -170,11 +183,22 @@ body {
 .period-controls select,
 .period-controls input[type="date"] {
   padding: 8px 10px;
-  border-radius: 8px;
+  border-radius: 9px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
   font-size: 16px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.period-controls select:hover,
+.period-controls input[type="date"]:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+.period-controls select:focus,
+.period-controls input[type="date"]:focus {
+  outline: none;
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.22);
 }
 .period-controls select option { color: #111; }
 
@@ -236,7 +260,9 @@ button {
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 12px;
+  transition: background-color 0.15s ease;
 }
+.btn-danger-mini:hover { background: #fbd9d9; }
 
 .link-btn {
   background: none;
@@ -659,6 +685,13 @@ tfoot .sticky-col { background: var(--navy); color: #fff; }
   padding: 16px 18px;
   overflow: auto;
 }
+.modal-body::-webkit-scrollbar { width: 10px; }
+.modal-body::-webkit-scrollbar-track { background: transparent; }
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(181, 85, 58, 0.35);
+  border-radius: 999px;
+}
+.modal-body::-webkit-scrollbar-thumb:hover { background: rgba(181, 85, 58, 0.55); }
 
 .modal-footer {
   padding: 12px 18px;
@@ -696,9 +729,12 @@ table.history-table th, table.history-table td {
 }
 table.manage-table th { background: var(--blue-tint); }
 table.history-table th { background: var(--navy); color: #fff; }
-.manage-table .mg-input { width: 100%; border: 1px solid transparent; padding: 4px; border-radius: 4px; font-size: 16px; }
-.manage-table .mg-input:focus { border-color: var(--navy-2); outline: none; }
+table.manage-table tbody tr:hover td,
+table.history-table tbody tr:hover td { background: var(--blue-tint); }
+.manage-table .mg-input { width: 100%; border: 1px solid transparent; padding: 4px; border-radius: 6px; font-size: 16px; transition: box-shadow 0.15s ease; }
+.manage-table .mg-input:focus { outline: none; box-shadow: 0 0 0 2px var(--navy-2); }
 .mg-check { width: 40px; }
+.mg-check input[type="checkbox"] { accent-color: var(--navy); width: 16px; height: 16px; cursor: pointer; }
 
 .manage-toolbar { margin-bottom: 10px; display: flex; justify-content: space-between; }
 
