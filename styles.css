@@ -17,6 +17,9 @@
   --error: #ef4444;
   --ok: #16a34a;
   --bg: #f4f6f9;
+  --type-water: #2563eb;
+  --type-electric: #c99a3f;
+  --type-gas: #ea580c;
 }
 
 * { box-sizing: border-box; }
@@ -275,30 +278,9 @@ button {
   background: #fff;
 }
 
-.filter-chips, .view-tabs, .toolbar-actions {
+.filter-chips, .toolbar-actions {
   display: flex;
   gap: 6px;
-}
-
-.view-tabs {
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 3px;
-  background: #fff;
-}
-
-.view-tab {
-  border: none;
-  background: transparent;
-  padding: 7px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--muted);
-}
-.view-tab.active {
-  background: var(--gold);
-  color: #2b2205;
 }
 
 .filter-chip {
@@ -351,6 +333,17 @@ button {
 
 .card-list { display: none; }
 
+.type-nav { display: none; }
+
+.card-section-heading {
+  font-size: 13px;
+  font-weight: 800;
+  padding: 4px 4px;
+}
+.card-section-heading.type-water { color: var(--type-water); }
+.card-section-heading.type-electric { color: var(--type-electric); }
+.card-section-heading.type-gas { color: var(--type-gas); }
+
 .card-empty {
   text-align: center;
   color: var(--muted);
@@ -361,9 +354,13 @@ button {
 .meter-card {
   background: #fff;
   border: 1px solid var(--border);
+  border-left-width: 4px;
   border-radius: 12px;
   padding: 12px 14px;
 }
+.meter-card.type-water { border-left-color: var(--type-water); }
+.meter-card.type-electric { border-left-color: var(--type-electric); }
+.meter-card.type-gas { border-left-color: var(--type-gas); }
 
 .card-head {
   display: flex;
@@ -387,6 +384,9 @@ button {
   color: var(--navy-2);
   margin-bottom: 8px;
 }
+.meter-card.type-water .card-meter-label { color: var(--type-water); }
+.meter-card.type-electric .card-meter-label { color: var(--type-electric); }
+.meter-card.type-gas .card-meter-label { color: var(--type-gas); }
 
 .card-meter-na { color: var(--muted); font-size: 12px; }
 .card-meter-na .note-text { margin-top: 0; }
@@ -674,8 +674,6 @@ table.history-table th { background: var(--navy); color: #fff; }
 
   .toolbar { padding: 10px 12px; gap: 8px; }
   .search-box { width: 100%; min-width: 0; padding: 10px 12px; font-size: 16px; }
-  .view-tabs { width: 100%; justify-content: space-between; }
-  .view-tab { flex: 1; text-align: center; padding: 9px 4px; }
   .filter-chips { width: 100%; }
   .filter-chip { flex: 1; text-align: center; padding: 9px 4px; }
   .toolbar-spacer { display: none; }
@@ -685,8 +683,31 @@ table.history-table th { background: var(--navy); color: #fff; }
   .legend { padding: 0 12px 8px 12px; gap: 6px 10px; }
 
   .table-wrap { display: none; }
-  .card-list { display: flex; flex-direction: column; gap: 10px; margin: 0 8px 16px 8px; }
+  .card-list { display: flex; flex-direction: column; gap: 16px; margin: 0 8px 16px 8px; }
+  .card-section { display: flex; flex-direction: column; gap: 10px; }
   .link-btn { font-size: 12px; padding: 4px 0; }
+
+  .type-nav {
+    display: flex;
+    gap: 6px;
+    position: sticky;
+    top: 0;
+    z-index: 6;
+    background: var(--bg);
+    padding: 8px 8px 4px 8px;
+  }
+  .type-nav-btn {
+    flex: 1;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 4px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .type-nav-btn.type-water { color: var(--type-water); border-color: var(--type-water); }
+  .type-nav-btn.type-electric { color: var(--type-electric); border-color: var(--type-electric); }
+  .type-nav-btn.type-gas { color: var(--type-gas); border-color: var(--type-gas); }
 
   .modal { max-width: 100%; max-height: 94vh; border-radius: 12px; }
   .modal.wide { max-width: 100%; }

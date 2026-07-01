@@ -8,11 +8,11 @@ const SPIKE_RATIO = 2.5; // 用量超過歷史平均的倍數視為異常偏高
 
 let state = null;
 let currentFilter = 'all'; // all | unfilled | anomaly
-let meterView = 'all'; // all | water | electric | gas -- 手機板可切換單一錶種以縮減欄位
 let searchKeyword = '';
 let saveTimer = null;
 
 const TYPE_LABEL = { water: '水錶（度）', electric: '電錶（度）', gas: '瓦斯（KG）' };
+const TYPE_SECTION_LABEL = { water: '水錶', electric: '電錶', gas: '瓦斯' };
 
 /* ---------------- 工具函式 ---------------- */
 
@@ -206,14 +206,12 @@ function renderStats() {
 /* ---------------- 渲染：主表格 ---------------- */
 
 function relevantTypes(row) {
-  const present = ['water', 'electric', 'gas'].filter((t) => hasMeter(row[t]));
-  if (meterView === 'all') return present;
-  return present.filter((t) => t === meterView);
+  return ['water', 'electric', 'gas'].filter((t) => hasMeter(row[t]));
 }
 
 function rowMatchesFilter(row) {
   const types = relevantTypes(row);
-  if (!types.length) return false; // 手機單一錶種檢視下，跳過與該錶種無關的列
+  if (!types.length) return false;
 
   if (searchKeyword) {
     const kw = searchKeyword.toLowerCase();
@@ -227,6 +225,20 @@ function rowMatchesFilter(row) {
   if (currentFilter === 'anomaly') {
     return types.some((t) => ['negative', 'spike'].includes(cellStatus(row, t).status));
   }
+  return true;
+}
+
+function cardMatchesFilter(row, type) {
+  if (!hasMeter(row[type])) return false;
+  if (searchKeyword) {
+    const kw = searchKeyword.toLowerCase();
+    const hay = `${row.group} ${row.name}`.toLowerCase();
+    if (!hay.includes(kw)) return false;
+  }
+  if (currentFilter === 'all') return true;
+  const status = cellStatus(row, type).status;
+  if (currentFilter === 'unfilled') return status === 'unfilled';
+  if (currentFilter === 'anomaly') return status === 'negative' || status === 'spike';
   return true;
 }
 
@@ -335,44 +347,29 @@ function cardHtmlForType(row, type) {
     ${block}`;
 }
 
-function renderTableHead(view) {
+function renderTableHead() {
   const thead = document.getElementById('tableHead');
-  if (view === 'all') {
-    thead.innerHTML = `
-      <tr>
-        <th rowspan="2" class="sticky-col" style="left:0">門市</th>
-        <th rowspan="2" class="sticky-col" style="left:56px">項目名稱</th>
-        <th colspan="2">水錶（度）</th>
-        <th colspan="3">電錶（度）</th>
-        <th colspan="3">瓦斯（KG）</th>
-      </tr>
-      <tr>
-        <th>上月度數</th><th>本月度數／用量</th>
-        <th>電表號碼</th><th>上月度數</th><th>本月度數／用量</th>
-        <th>瓦斯錶號</th><th>上月度數</th><th>本月度數／用量</th>
-      </tr>`;
-    return;
-  }
-  const hasNo = view !== 'water';
   thead.innerHTML = `
     <tr>
-      <th class="sticky-col" style="left:0">門市</th>
-      <th class="sticky-col" style="left:56px">項目名稱</th>
-      ${hasNo ? `<th>${view === 'electric' ? '電表號碼' : '瓦斯錶號'}</th>` : ''}
-      <th>上月度數</th>
-      <th>本月度數／用量</th>
+      <th rowspan="2" class="sticky-col" style="left:0">門市</th>
+      <th rowspan="2" class="sticky-col" style="left:56px">項目名稱</th>
+      <th colspan="2">水錶（度）</th>
+      <th colspan="3">電錶（度）</th>
+      <th colspan="3">瓦斯（KG）</th>
+    </tr>
+    <tr>
+      <th>上月度數</th><th>本月度數／用量</th>
+      <th>電表號碼</th><th>上月度數</th><th>本月度數／用量</th>
+      <th>瓦斯錶號</th><th>上月度數</th><th>本月度數／用量</th>
     </tr>`;
 }
 
-function buildRowCellsHtml(row, view) {
-  if (view === 'all') {
-    return meterCellHtml(row, 'water') + meterCellHtml(row, 'electric') + meterCellHtml(row, 'gas');
-  }
-  return meterCellHtml(row, view);
+function buildRowCellsHtml(row) {
+  return meterCellHtml(row, 'water') + meterCellHtml(row, 'electric') + meterCellHtml(row, 'gas');
 }
 
 function renderTable() {
-  renderTableHead(meterView);
+  renderTableHead();
 
   const tbody = document.getElementById('tableBody');
   const cardList = document.getElementById('cardList');
@@ -381,11 +378,9 @@ function renderTable() {
 
   let bandToggle = false;
   let lastGroup = null;
-  let matchCount = 0;
 
   state.rows.forEach((row) => {
     if (!rowMatchesFilter(row)) return;
-    matchCount++;
 
     if (row.group) {
       if (row.group !== lastGroup) { bandToggle = !bandToggle; lastGroup = row.group; }
@@ -401,22 +396,37 @@ function renderTable() {
         <span class="row-name">${escapeHtml(row.name)}</span>
         <button type="button" class="link-btn history-btn" data-row="${row.id}" title="歷史紀錄">歷程</button>
       </td>
-      ${buildRowCellsHtml(row, meterView)}
+      ${buildRowCellsHtml(row)}
     `;
     tbody.appendChild(tr);
-
-    const cardTypes = meterView === 'all' ? ['water', 'electric', 'gas'] : [meterView];
-    cardTypes.forEach((type) => {
-      const html = cardHtmlForType(row, type);
-      if (!html) return;
-      const card = document.createElement('div');
-      card.className = 'meter-card';
-      card.innerHTML = html;
-      cardList.appendChild(card);
-    });
   });
 
-  if (!matchCount) {
+  let totalCards = 0;
+  ['water', 'electric', 'gas'].forEach((type) => {
+    const rowsForType = state.rows.filter((row) => cardMatchesFilter(row, type));
+    if (!rowsForType.length) return;
+    totalCards += rowsForType.length;
+
+    const section = document.createElement('div');
+    section.className = 'card-section';
+    section.id = `cardSection-${type}`;
+
+    const heading = document.createElement('div');
+    heading.className = `card-section-heading type-${type}`;
+    heading.textContent = TYPE_SECTION_LABEL[type];
+    section.appendChild(heading);
+
+    rowsForType.forEach((row) => {
+      const card = document.createElement('div');
+      card.className = `meter-card type-${type}`;
+      card.innerHTML = cardHtmlForType(row, type);
+      section.appendChild(card);
+    });
+
+    cardList.appendChild(section);
+  });
+
+  if (!totalCards) {
     cardList.innerHTML = '<div class="card-empty">沒有符合條件的項目</div>';
   }
 
@@ -424,7 +434,6 @@ function renderTable() {
 }
 
 function renderFooterTotals() {
-  const view = meterView;
   const totals = { water: 0, electric: 0, gas: 0 };
   const costs = { water: 0, electric: 0, gas: 0 };
 
@@ -443,26 +452,14 @@ function renderFooterTotals() {
   const cellHtml = (type) => `<div>${fmtNum(totals[type])}</div><div class="cost-val" style="color:#fff">${costs[type] ? `NT$ ${fmtMoney(costs[type])}` : ''}</div>`;
   const tfoot = document.getElementById('tableFoot');
 
-  if (view === 'all') {
-    tfoot.innerHTML = `
-      <tr>
-        <td class="sticky-col" style="left:0" colspan="2">合計</td>
-        <td colspan="2">${cellHtml('water')}</td>
-        <td></td>
-        <td colspan="2">${cellHtml('electric')}</td>
-        <td></td>
-        <td colspan="2">${cellHtml('gas')}</td>
-      </tr>`;
-    return;
-  }
-
-  const meterNoColTd = view === 'water' ? '' : '<td></td>';
   tfoot.innerHTML = `
     <tr>
       <td class="sticky-col" style="left:0" colspan="2">合計</td>
-      ${meterNoColTd}
+      <td colspan="2">${cellHtml('water')}</td>
       <td></td>
-      <td>${cellHtml(view)}</td>
+      <td colspan="2">${cellHtml('electric')}</td>
+      <td></td>
+      <td colspan="2">${cellHtml('gas')}</td>
     </tr>`;
 }
 
@@ -853,12 +850,10 @@ function setHandlers() {
     });
   });
 
-  document.querySelectorAll('.view-tab').forEach((tab) => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.view-tab').forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
-      meterView = tab.dataset.view;
-      renderTable();
+  document.querySelectorAll('.type-nav-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(`cardSection-${btn.dataset.target}`);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 

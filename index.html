@@ -89,12 +89,6 @@
 
     <div class="toolbar">
       <input type="text" id="searchInput" class="search-box" placeholder="搜尋門市代號 / 名稱" />
-      <div class="view-tabs">
-        <button type="button" class="view-tab active" data-view="all">全部</button>
-        <button type="button" class="view-tab" data-view="water">水錶</button>
-        <button type="button" class="view-tab" data-view="electric">電錶</button>
-        <button type="button" class="view-tab" data-view="gas">瓦斯</button>
-      </div>
       <div class="filter-chips">
         <button type="button" class="filter-chip active" data-filter="all">全部</button>
         <button type="button" class="filter-chip" data-filter="unfilled">未填</button>
@@ -129,6 +123,11 @@
       </table>
     </div>
 
+    <div class="type-nav" id="typeNav">
+      <button type="button" class="type-nav-btn type-water" data-target="water">水錶</button>
+      <button type="button" class="type-nav-btn type-electric" data-target="electric">電錶</button>
+      <button type="button" class="type-nav-btn type-gas" data-target="gas">瓦斯</button>
+    </div>
     <div class="card-list" id="cardList"></div>
 
     <div class="footnote">
