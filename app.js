@@ -330,7 +330,6 @@ function meterCellHtml(row, type) {
   const cost = computeCost(type, st.usage);
   const statusClass = statusClassOf(st.status);
   const editable = isAdmin();
-  const hasPhoto = photoKeys.has(`${row.id}_${type}`);
 
   const meterNoCell = type === 'water' ? '' : `
     <td class="meter-no-cell">
@@ -349,7 +348,7 @@ function meterCellHtml(row, type) {
     <td class="this-cell field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
       ${photoControlHtml(row.id, type)}
       <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-        placeholder="${hasPhoto ? '待填' : '請先拍照'}" ${hasPhoto ? '' : 'disabled'}
+        placeholder="待填"
         data-row="${row.id}" data-type="${type}" data-field="this" />
     </td>
     <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</td>`;
@@ -367,7 +366,6 @@ function meterCardBlock(row, type) {
   const cost = computeCost(type, st.usage);
   const statusClass = statusClassOf(st.status);
   const editable = isAdmin();
-  const hasPhoto = photoKeys.has(`${row.id}_${type}`);
 
   const meterNoField = type === 'water' ? '' : `
     <div class="card-field-full">
@@ -393,7 +391,7 @@ function meterCardBlock(row, type) {
           <label>本月度數</label>
           ${photoControlHtml(row.id, type)}
           <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-            placeholder="${hasPhoto ? '待填' : '請先拍照'}" ${hasPhoto ? '' : 'disabled'}
+            placeholder="待填"
             data-row="${row.id}" data-type="${type}" data-field="this" />
         </div>
       </div>

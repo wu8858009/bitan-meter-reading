@@ -612,11 +612,6 @@ table.meter-table tbody tr:hover .sticky-col {
   color: var(--muted);
   background: rgba(255, 255, 255, 0.02);
 }
-.cell-input:disabled {
-  color: var(--muted);
-  background: rgba(255, 255, 255, 0.02);
-  cursor: not-allowed;
-}
 
 .photo-control {
   display: flex;
