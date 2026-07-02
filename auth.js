@@ -185,7 +185,7 @@ function renderUserApprovalList() {
   const rows = loadUsers().slice().sort((a, b) => (a.username || '').localeCompare(b.username || ''));
 
   const table = document.createElement('table');
-  table.className = 'meter-table';
+  table.className = 'account-table';
   const thead = document.createElement('thead');
   thead.innerHTML = '<tr><th>帳號</th><th>角色</th><th>狀態</th><th>操作</th></tr>';
   const tbody = document.createElement('tbody');

@@ -860,28 +860,31 @@ tfoot .sticky-col { background: var(--navy); color: #fff; }
   font-size: 16px;
 }
 
-table.manage-table, table.history-table {
+table.manage-table, table.history-table, table.period-manage-table, table.account-table {
   border-collapse: collapse;
   width: 100%;
   font-size: 12.5px;
 }
 table.manage-table th, table.manage-table td,
-table.history-table th, table.history-table td {
+table.history-table th, table.history-table td,
+table.period-manage-table th, table.period-manage-table td,
+table.account-table th, table.account-table td {
   border: 1px solid var(--border);
   padding: 5px;
   text-align: center;
   color: var(--text);
 }
-table.manage-table th { background: rgba(37, 99, 235, 0.12); color: #94a3b8; }
+table.manage-table th, table.period-manage-table th, table.account-table th { background: rgba(37, 99, 235, 0.12); color: #94a3b8; }
 table.history-table th { background: var(--navy); color: #fff; }
-table.manage-table thead th {
+table.manage-table thead th, table.period-manage-table thead th, table.account-table thead th {
   position: sticky;
   top: 0;
   z-index: 5;
   background: #1e293b;
 }
 table.manage-table tbody tr:hover td,
-table.history-table tbody tr:hover td { background: var(--blue-tint); }
+table.history-table tbody tr:hover td,
+table.account-table tbody tr:hover td { background: var(--blue-tint); }
 .manage-table .mg-input {
   width: 100%;
   border: 1px solid transparent;
@@ -897,6 +900,7 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
 .mg-check input[type="checkbox"] { accent-color: var(--navy-2); width: 16px; height: 16px; cursor: pointer; }
 
 .manage-toolbar { margin-bottom: 10px; display: flex; justify-content: space-between; }
+.manage-scroll-hint { display: none; }
 
 .mg-scan-cell { display: flex; align-items: center; gap: 4px; }
 .mg-scan-cell .mg-input { flex: 1; }
@@ -1088,6 +1092,7 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
     padding: 0 12px;
   }
   #historyTableWrap { -webkit-overflow-scrolling: touch; }
+  .manage-scroll-hint { display: block; font-size: 11px; color: var(--muted); margin-bottom: 6px; }
   table.manage-table { width: auto; min-width: 640px; font-size: 12px; }
   table.history-table { width: auto; min-width: 480px; font-size: 11px; }
   .mg-check input[type="checkbox"] { width: 20px; height: 20px; }

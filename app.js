@@ -741,7 +741,7 @@ function renderPeriodManageList() {
   const periods = sortedPeriods().slice().reverse(); // 新到舊
 
   wrap.innerHTML = `
-    <table class="manage-table">
+    <table class="period-manage-table">
       <thead>
         <tr><th>期別</th><th>抄表日</th><th></th></tr>
       </thead>
