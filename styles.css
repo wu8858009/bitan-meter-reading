@@ -151,17 +151,20 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   position: sticky;
   top: 0;
   z-index: 30;
 }
 
+.app-header > div:first-child { min-width: 0; }
+
 .brand {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  min-width: 0;
 }
 
 .brand h1 {
@@ -173,6 +176,9 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .badge-pro {
@@ -183,12 +189,16 @@ body {
   padding: 3px 8px;
   border-radius: 999px;
   letter-spacing: 1px;
+  flex-shrink: 0;
 }
 
 .brand-sub {
   font-size: 12px;
   color: rgba(255, 255, 255, 0.7);
   margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .period-controls {
