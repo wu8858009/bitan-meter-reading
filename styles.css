@@ -1053,6 +1053,7 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
   .type-nav-btn.type-water { color: var(--type-water); }
   .type-nav-btn.type-electric { color: var(--type-electric); }
   .type-nav-btn.type-gas { color: var(--type-gas); }
+  .type-nav-btn.active { background: rgba(255, 255, 255, 0.12); box-shadow: inset 0 0 0 1px currentColor; }
 
   .btn-photo { padding: 6px 10px; font-size: 11px; }
   .photo-thumb { width: 28px; height: 28px; }
