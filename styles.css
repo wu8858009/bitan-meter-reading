@@ -799,6 +799,18 @@ tfoot .sticky-col { background: var(--navy); color: #fff; }
   margin-bottom: 12px;
 }
 .form-row label { width: 90px; font-size: 13px; color: var(--muted); }
+
+.pref-checkbox { margin-bottom: 10px; }
+.pref-checkbox label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+  cursor: pointer;
+}
+.pref-checkbox input[type="checkbox"] { accent-color: var(--navy-2); width: 16px; height: 16px; cursor: pointer; }
+.pref-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
 .form-row input {
   flex: 1;
   padding: 8px 10px;

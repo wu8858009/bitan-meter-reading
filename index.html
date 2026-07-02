@@ -101,6 +101,7 @@
       <div class="toolbar-actions">
         <button class="btn" id="btnPrice" type="button">💰 單價設定</button>
         <button class="btn" id="btnManage" type="button">🗂️ 管理抄表項目</button>
+        <button class="btn" id="btnColumnPrefs" type="button">🧩 欄位設定</button>
         <button class="btn" id="btnExportCsv" type="button">📄 匯出 CSV</button>
         <button class="btn" id="btnExportExcel" type="button">📊 匯出 Excel</button>
         <button class="btn" id="btnPrint" type="button">🖨️ 列印</button>
@@ -156,6 +157,26 @@
         <div class="modal-footer">
           <button class="btn" id="btnPriceCancel" type="button">取消</button>
           <button class="btn btn-primary" id="btnPriceSave" type="button">儲存</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 欄位顯示設定 modal -->
+    <div class="modal-overlay" id="columnPrefsModal">
+      <div class="modal">
+        <div class="modal-header">自訂欄位顯示（僅電腦版表格）</div>
+        <div class="modal-body">
+          <div class="pref-checkbox"><label><input type="checkbox" id="colWater" /> 水錶（度）</label></div>
+          <div class="pref-checkbox"><label><input type="checkbox" id="colElectric" /> 電錶（度）</label></div>
+          <div class="pref-checkbox"><label><input type="checkbox" id="colGas" /> 瓦斯（KG）</label></div>
+          <hr class="pref-divider" />
+          <div class="pref-checkbox"><label><input type="checkbox" id="colMeterNo" /> 電表／瓦斯錶號欄</label></div>
+          <div class="pref-checkbox"><label><input type="checkbox" id="colLast" /> 上月度數欄</label></div>
+          <div class="pref-checkbox"><label><input type="checkbox" id="colUsage" /> 用量欄</label></div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn" id="btnColumnPrefsReset" type="button">全部顯示</button>
+          <button class="btn btn-primary" id="btnColumnPrefsSave" type="button">套用</button>
         </div>
       </div>
     </div>

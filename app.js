@@ -4,6 +4,7 @@
 */
 
 const STORAGE_KEY = 'bpt_meter_state_v2';
+const COLUMN_PREFS_KEY = 'bpt_column_prefs_v1';
 const SPIKE_RATIO = 2.5; // 用量超過歷史平均的倍數視為異常偏高
 const ROLLOVER_MAX = { water: 10000, electric: 100000, gas: 100000 }; // 錶歸零進位上限（水表4位、電表5位）
 
@@ -14,6 +15,7 @@ let saveTimer = null;
 let photoKeys = new Set(); // 本期已拍照存證的 `${rowId}_${type}` 集合
 let thumbObjectUrls = [];
 let previewObjectUrl = null;
+let columnPrefs = loadColumnPrefs(); // 電腦版表格欄位顯示設定（僅存於本機瀏覽器，不隨備份匯出）
 
 const TYPE_LABEL = { water: '水錶（度）', electric: '電錶（度）', gas: '瓦斯（KG）' };
 const TYPE_SECTION_LABEL = { water: '水錶', electric: '電錶', gas: '瓦斯' };
@@ -220,6 +222,23 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function defaultColumnPrefs() {
+  return { water: true, electric: true, gas: true, meterNo: true, last: true, usage: true };
+}
+
+function loadColumnPrefs() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(COLUMN_PREFS_KEY));
+    return raw ? { ...defaultColumnPrefs(), ...raw } : defaultColumnPrefs();
+  } catch {
+    return defaultColumnPrefs();
+  }
+}
+
+function saveColumnPrefs() {
+  localStorage.setItem(COLUMN_PREFS_KEY, JSON.stringify(columnPrefs));
+}
+
 function ensureReadingSlots() {
   // 確保每個期別對每一列的每個「有錶」欄位都存在 reading 物件（新增項目後補齊用）
   Object.keys(state.periods).forEach((period) => {
@@ -383,12 +402,23 @@ function usageInnerHtml(st, cost, rowId, type) {
   `;
 }
 
+function visibleSubcols(type) {
+  const cols = [];
+  if (type !== 'water' && columnPrefs.meterNo) cols.push('meterNo');
+  if (columnPrefs.last) cols.push('last');
+  cols.push('this');
+  if (columnPrefs.usage) cols.push('usage');
+  return cols;
+}
+
 function meterCellHtml(row, type) {
+  if (!columnPrefs[type]) return '';
+  const cols = visibleSubcols(type);
   const slot = row[type];
+
   if (!hasMeter(slot)) {
     const note = slot && slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : '';
-    const colspan = type === 'water' ? 3 : 4;
-    return `<td class="hatch" colspan="${colspan}">${note}</td>`;
+    return `<td class="hatch" colspan="${cols.length}">${note}</td>`;
   }
 
   const st = cellStatus(row, type);
@@ -397,29 +427,34 @@ function meterCellHtml(row, type) {
   const statusClass = statusClassOf(st.status);
   const editable = isAdmin();
 
-  const meterNoCell = type === 'water' ? '' : `
-    <td class="meter-no-cell">
-      <input type="text" class="cell-input meter-no-input" value="${escapeHtml(slot.meterNo || '')}"
-        ${editable ? '' : 'readonly'}
-        data-row="${row.id}" data-type="${type}" data-field="meterNo" />
-      ${slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : ''}
-    </td>`;
-
-  return `${meterNoCell}
-    <td class="last-cell">
-      <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
-        ${editable ? '' : 'readonly'}
-        data-row="${row.id}" data-type="${type}" data-field="last" />
-    </td>
-    <td class="this-cell field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
-      <div class="this-input-row">
-        <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-          placeholder="待填"
-          data-row="${row.id}" data-type="${type}" data-field="this" />
-        ${photoControlHtml(row.id, type)}
-      </div>
-    </td>
-    <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</td>`;
+  return cols.map((col) => {
+    if (col === 'meterNo') {
+      return `<td class="meter-no-cell">
+        <input type="text" class="cell-input meter-no-input" value="${escapeHtml(slot.meterNo || '')}"
+          ${editable ? '' : 'readonly'}
+          data-row="${row.id}" data-type="${type}" data-field="meterNo" />
+        ${slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : ''}
+      </td>`;
+    }
+    if (col === 'last') {
+      return `<td class="last-cell">
+        <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
+          ${editable ? '' : 'readonly'}
+          data-row="${row.id}" data-type="${type}" data-field="last" />
+      </td>`;
+    }
+    if (col === 'this') {
+      return `<td class="this-cell field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
+        <div class="this-input-row">
+          <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
+            placeholder="待填"
+            data-row="${row.id}" data-type="${type}" data-field="this" />
+          ${photoControlHtml(row.id, type)}
+        </div>
+      </td>`;
+    }
+    return `<td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</td>`;
+  }).join('');
 }
 
 function meterCardBlock(row, type) {
@@ -484,21 +519,27 @@ function cardHtmlForType(row, type) {
     ${block}`;
 }
 
+const SUBCOL_LABEL = { last: '上月度數', this: '本月度數', usage: '用量' };
+
+function subcolLabel(type, col) {
+  if (col === 'meterNo') return type === 'electric' ? '電表號碼' : '瓦斯錶號';
+  return SUBCOL_LABEL[col];
+}
+
 function renderTableHead() {
   const thead = document.getElementById('tableHead');
+  const types = ['water', 'electric', 'gas'].filter((t) => columnPrefs[t]);
+
+  const groupRow = types.map((t) => `<th colspan="${visibleSubcols(t).length}">${TYPE_LABEL[t]}</th>`).join('');
+  const subRow = types.map((t) => visibleSubcols(t).map((c) => `<th>${subcolLabel(t, c)}</th>`).join('')).join('');
+
   thead.innerHTML = `
     <tr>
       <th rowspan="2" class="sticky-col" style="left:0">門市</th>
       <th rowspan="2" class="sticky-col" style="left:56px">項目名稱</th>
-      <th colspan="3">水錶（度）</th>
-      <th colspan="4">電錶（度）</th>
-      <th colspan="4">瓦斯（KG）</th>
+      ${groupRow}
     </tr>
-    <tr>
-      <th>上月度數</th><th>本月度數</th><th>用量</th>
-      <th>電表號碼</th><th>上月度數</th><th>本月度數</th><th>用量</th>
-      <th>瓦斯錶號</th><th>上月度數</th><th>本月度數</th><th>用量</th>
-    </tr>`;
+    <tr>${subRow}</tr>`;
 }
 
 function buildRowCellsHtml(row) {
@@ -591,14 +632,15 @@ function renderFooterTotals() {
   const cellHtml = (type) => `<div>${fmtNum(totals[type])}</div><div class="cost-val" style="color:#fff">${costs[type] ? `NT$ ${fmtMoney(costs[type])}` : ''}</div>`;
   const tfoot = document.getElementById('tableFoot');
 
+  const types = ['water', 'electric', 'gas'].filter((t) => columnPrefs[t]);
+  const typeCellsHtml = types.map((type) => visibleSubcols(type)
+    .map((col) => (col === 'this' ? `<td>${cellHtml(type)}</td>` : '<td></td>'))
+    .join('')).join('');
+
   tfoot.innerHTML = `
     <tr>
       <td class="sticky-col" style="left:0" colspan="2">合計</td>
-      <td colspan="2">${cellHtml('water')}</td>
-      <td></td>
-      <td colspan="2">${cellHtml('electric')}</td>
-      <td></td>
-      <td colspan="2">${cellHtml('gas')}</td>
+      ${typeCellsHtml}
     </tr>`;
 }
 
@@ -779,6 +821,41 @@ function savePrices() {
   closeModal('priceModal');
   renderAll();
   toast('單價設定已更新');
+}
+
+/* ---------------- 欄位顯示設定 modal ---------------- */
+
+const COLUMN_PREF_CHECKBOX_IDS = {
+  water: 'colWater',
+  electric: 'colElectric',
+  gas: 'colGas',
+  meterNo: 'colMeterNo',
+  last: 'colLast',
+  usage: 'colUsage',
+};
+
+function openColumnPrefsModal() {
+  Object.entries(COLUMN_PREF_CHECKBOX_IDS).forEach(([key, id]) => {
+    document.getElementById(id).checked = columnPrefs[key];
+  });
+  openModal('columnPrefsModal');
+}
+
+function saveColumnPrefsFromModal() {
+  Object.entries(COLUMN_PREF_CHECKBOX_IDS).forEach(([key, id]) => {
+    columnPrefs[key] = document.getElementById(id).checked;
+  });
+  saveColumnPrefs();
+  closeModal('columnPrefsModal');
+  renderTable();
+  toast('欄位顯示設定已更新');
+}
+
+function resetColumnPrefsModal() {
+  const defaults = defaultColumnPrefs();
+  Object.entries(COLUMN_PREF_CHECKBOX_IDS).forEach(([key, id]) => {
+    document.getElementById(id).checked = defaults[key];
+  });
 }
 
 /* ---------------- 抄表項目管理 modal ---------------- */
@@ -1091,6 +1168,10 @@ function setHandlers() {
   document.getElementById('btnManageAdd').addEventListener('click', addManageRow);
   document.getElementById('btnManageSave').addEventListener('click', saveManageTable);
   document.getElementById('btnManageCancel').addEventListener('click', () => closeModal('manageModal'));
+
+  document.getElementById('btnColumnPrefs').addEventListener('click', openColumnPrefsModal);
+  document.getElementById('btnColumnPrefsSave').addEventListener('click', saveColumnPrefsFromModal);
+  document.getElementById('btnColumnPrefsReset').addEventListener('click', resetColumnPrefsModal);
 
   document.getElementById('btnHistoryClose').addEventListener('click', () => closeModal('historyModal'));
 
