@@ -387,7 +387,7 @@ function meterCellHtml(row, type) {
   const slot = row[type];
   if (!hasMeter(slot)) {
     const note = slot && slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : '';
-    const colspan = type === 'water' ? 2 : 3;
+    const colspan = type === 'water' ? 3 : 4;
     return `<td class="hatch" colspan="${colspan}">${note}</td>`;
   }
 
@@ -490,14 +490,14 @@ function renderTableHead() {
     <tr>
       <th rowspan="2" class="sticky-col" style="left:0">門市</th>
       <th rowspan="2" class="sticky-col" style="left:56px">項目名稱</th>
-      <th colspan="2">水錶（度）</th>
-      <th colspan="3">電錶（度）</th>
-      <th colspan="3">瓦斯（KG）</th>
+      <th colspan="3">水錶（度）</th>
+      <th colspan="4">電錶（度）</th>
+      <th colspan="4">瓦斯（KG）</th>
     </tr>
     <tr>
-      <th>上月度數</th><th>本月度數／用量</th>
-      <th>電表號碼</th><th>上月度數</th><th>本月度數／用量</th>
-      <th>瓦斯錶號</th><th>上月度數</th><th>本月度數／用量</th>
+      <th>上月度數</th><th>本月度數</th><th>用量</th>
+      <th>電表號碼</th><th>上月度數</th><th>本月度數</th><th>用量</th>
+      <th>瓦斯錶號</th><th>上月度數</th><th>本月度數</th><th>用量</th>
     </tr>`;
 }
 
