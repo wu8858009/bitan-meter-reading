@@ -613,12 +613,20 @@ table.meter-table tbody tr:hover .sticky-col {
   background: rgba(255, 255, 255, 0.02);
 }
 
+.this-input-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.this-input-row .this-input {
+  flex: 1;
+}
+
 .photo-control {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-bottom: 4px;
-  justify-content: center;
+  flex-shrink: 0;
 }
 .photo-thumb {
   width: 22px;
@@ -627,6 +635,7 @@ table.meter-table tbody tr:hover .sticky-col {
   object-fit: cover;
   border: 1px solid var(--border);
 }
+.photo-thumb.has-photo { cursor: zoom-in; }
 .btn-photo {
   border: 1px solid var(--type-gas);
   background: rgba(251, 146, 60, 0.1);
@@ -636,6 +645,20 @@ table.meter-table tbody tr:hover .sticky-col {
   padding: 3px 6px;
   border-radius: 999px;
   white-space: nowrap;
+}
+
+.photo-preview-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.3);
+}
+.photo-preview-body img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .meter-no-cell { background: rgba(251, 146, 60, 0.08); min-width: 148px; }
@@ -918,7 +941,6 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
   .type-nav-btn.type-electric { color: var(--type-electric); }
   .type-nav-btn.type-gas { color: var(--type-gas); }
 
-  .photo-control { justify-content: flex-start; margin-bottom: 6px; }
   .btn-photo { padding: 6px 10px; font-size: 11px; }
   .photo-thumb { width: 28px; height: 28px; }
   .badge-rollover, .btn-apply-rollover { font-size: 11px; }

@@ -13,6 +13,7 @@ let searchKeyword = '';
 let saveTimer = null;
 let photoKeys = new Set(); // 本期已拍照存證的 `${rowId}_${type}` 集合
 let thumbObjectUrls = [];
+let previewObjectUrl = null;
 
 const TYPE_LABEL = { water: '水錶（度）', electric: '電錶（度）', gas: '瓦斯（KG）' };
 const TYPE_SECTION_LABEL = { water: '水錶', electric: '電錶', gas: '瓦斯' };
@@ -43,6 +44,19 @@ async function loadPhotoThumbnails() {
       img.src = url;
       img.style.display = '';
     } catch (err) { /* 縮圖載入失敗不影響操作 */ }
+  }
+}
+
+async function openPhotoPreview(rowId, type) {
+  try {
+    const blob = await getPhotoBlob(state.currentPeriod, rowId, type);
+    if (!blob) return;
+    if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl = URL.createObjectURL(blob);
+    document.getElementById('photoPreviewImg').src = previewObjectUrl;
+    openModal('photoPreviewModal');
+  } catch (err) {
+    toast('照片載入失敗，請再試一次');
   }
 }
 
@@ -346,10 +360,12 @@ function meterCellHtml(row, type) {
         data-row="${row.id}" data-type="${type}" data-field="last" />
     </td>
     <td class="this-cell field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
-      ${photoControlHtml(row.id, type)}
-      <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-        placeholder="待填"
-        data-row="${row.id}" data-type="${type}" data-field="this" />
+      <div class="this-input-row">
+        <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
+          placeholder="待填"
+          data-row="${row.id}" data-type="${type}" data-field="this" />
+        ${photoControlHtml(row.id, type)}
+      </div>
     </td>
     <td class="usage-cell usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</td>`;
 }
@@ -389,10 +405,12 @@ function meterCardBlock(row, type) {
         </div>
         <div class="card-field field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
           <label>本月度數</label>
-          ${photoControlHtml(row.id, type)}
-          <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
-            placeholder="待填"
-            data-row="${row.id}" data-type="${type}" data-field="this" />
+          <div class="this-input-row">
+            <input type="text" inputmode="decimal" class="cell-input this-input" value="${fmtNum(reading.this)}"
+              placeholder="待填"
+              data-row="${row.id}" data-type="${type}" data-field="this" />
+            ${photoControlHtml(row.id, type)}
+          </div>
         </div>
       </div>
       <div class="card-usage usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</div>
@@ -928,6 +946,11 @@ function setHandlers() {
     const el = document.getElementById(id);
     el.addEventListener('input', handleTableInput);
     el.addEventListener('click', (e) => {
+      const photoThumb = e.target.closest('.photo-thumb.has-photo');
+      if (photoThumb) {
+        openPhotoPreview(photoThumb.dataset.row, photoThumb.dataset.type);
+        return;
+      }
       const photoBtn = e.target.closest('.btn-photo');
       if (photoBtn) {
         const fileInput = el.querySelector(
@@ -1001,6 +1024,8 @@ function setHandlers() {
   document.getElementById('btnManageCancel').addEventListener('click', () => closeModal('manageModal'));
 
   document.getElementById('btnHistoryClose').addEventListener('click', () => closeModal('historyModal'));
+
+  document.getElementById('btnPhotoPreviewClose').addEventListener('click', () => closeModal('photoPreviewModal'));
 
   document.getElementById('btnExportCsv').addEventListener('click', exportCSV);
   document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
