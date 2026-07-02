@@ -1172,6 +1172,22 @@ function setHandlers() {
     });
   });
 
+  document.getElementById('btnToolbarMenu').addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('toolbarMenuDropdown').classList.toggle('open');
+  });
+  document.getElementById('toolbarMenuDropdown').addEventListener('click', (e) => {
+    if (e.target.closest('button')) {
+      document.getElementById('toolbarMenuDropdown').classList.remove('open');
+    }
+  });
+  document.addEventListener('click', (e) => {
+    const menu = document.getElementById('toolbarMenu');
+    if (menu && !menu.contains(e.target)) {
+      document.getElementById('toolbarMenuDropdown').classList.remove('open');
+    }
+  });
+
   document.querySelectorAll('.type-nav-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       const target = document.getElementById(`cardSection-${btn.dataset.target}`);

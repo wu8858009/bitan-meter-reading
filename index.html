@@ -101,16 +101,19 @@
         <button type="button" class="filter-chip" data-filter="anomaly">異常</button>
       </div>
       <div class="toolbar-spacer"></div>
-      <div class="toolbar-actions">
-        <button class="btn" id="btnPrice" type="button">💰 單價設定</button>
-        <button class="btn" id="btnManage" type="button">🗂️ 管理抄表項目</button>
-        <button class="btn" id="btnColumnPrefs" type="button">🧩 欄位設定</button>
-        <button class="btn" id="btnExportCsv" type="button">📄 匯出 CSV</button>
-        <button class="btn" id="btnExportExcel" type="button">📊 匯出 Excel</button>
-        <button class="btn" id="btnPrint" type="button">🖨️ 列印</button>
-        <button class="btn" id="btnBackupExport" type="button">💾 備份匯出</button>
-        <button class="btn" id="btnBackupImport" type="button">📥 還原備份</button>
-        <input type="file" id="backupFileInput" accept="application/json" hidden />
+      <div class="toolbar-menu" id="toolbarMenu">
+        <button class="btn btn-menu-toggle" id="btnToolbarMenu" type="button" title="更多功能">☰ 功能選單</button>
+        <div class="toolbar-menu-dropdown" id="toolbarMenuDropdown">
+          <button class="btn" id="btnPrice" type="button">💰 單價設定</button>
+          <button class="btn" id="btnManage" type="button">🗂️ 管理抄表項目</button>
+          <button class="btn" id="btnColumnPrefs" type="button">🧩 欄位設定</button>
+          <button class="btn" id="btnExportCsv" type="button">📄 匯出 CSV</button>
+          <button class="btn" id="btnExportExcel" type="button">📊 匯出 Excel</button>
+          <button class="btn" id="btnPrint" type="button">🖨️ 列印</button>
+          <button class="btn" id="btnBackupExport" type="button">💾 備份匯出</button>
+          <button class="btn" id="btnBackupImport" type="button">📥 還原備份</button>
+          <input type="file" id="backupFileInput" accept="application/json" hidden />
+        </div>
       </div>
     </div>
 

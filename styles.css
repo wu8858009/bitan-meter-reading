@@ -398,7 +398,7 @@ button {
 }
 .btn-scan-search:hover { background: rgba(59, 130, 246, 0.22); }
 
-.filter-chips, .toolbar-actions {
+.filter-chips {
   display: flex;
   gap: 6px;
 }
@@ -421,6 +421,26 @@ button {
 }
 
 .toolbar-spacer { flex: 1; }
+
+.toolbar-menu { position: relative; }
+.btn-menu-toggle { white-space: nowrap; }
+.toolbar-menu-dropdown {
+  display: none;
+  flex-direction: column;
+  gap: 6px;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 200px;
+  padding: 10px;
+  background: #111827;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  z-index: 40;
+}
+.toolbar-menu-dropdown.open { display: flex; }
+.toolbar-menu-dropdown .btn { width: 100%; text-align: left; }
 
 .legend {
   display: flex;
@@ -977,8 +997,9 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
   .filter-chips { width: 100%; }
   .filter-chip { flex: 1; text-align: center; padding: 9px 4px; }
   .toolbar-spacer { display: none; }
-  .toolbar-actions { width: 100%; flex-wrap: wrap; }
-  .toolbar-actions .btn { flex: 1 1 calc(50% - 6px); font-size: 12.5px; padding: 10px 6px; }
+  .toolbar-menu { width: 100%; }
+  .btn-menu-toggle { width: 100%; padding: 10px 6px; }
+  .toolbar-menu-dropdown { left: 0; right: 0; min-width: 0; }
 
   .legend { padding: 0 12px 8px 12px; gap: 6px 10px; }
 
