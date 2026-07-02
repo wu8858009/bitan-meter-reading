@@ -1057,7 +1057,7 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
     background: #fff;
   }
   table.meter-table th, table.meter-table td {
-    border-color: #ccc;
+    border: 1px solid #000;
     color: #000;
     background: #fff !important;
     padding: 3px 2px;
