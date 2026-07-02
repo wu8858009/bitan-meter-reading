@@ -477,6 +477,7 @@ function meterCellHtml(row, type) {
 }
 
 function meterCardBlock(row, type) {
+  if (!columnPrefs[type]) return '';
   const slot = row[type];
   if (!hasMeter(slot)) {
     if (!slot || !slot.note) return '';
@@ -489,26 +490,32 @@ function meterCardBlock(row, type) {
   const statusClass = statusClassOf(st.status);
   const editable = isAdmin();
 
-  const meterNoField = type === 'water' ? '' : `
+  const meterNoField = (type !== 'water' && columnPrefs.meterNo) ? `
     <div class="card-field-full">
       <label>${type === 'electric' ? '電表號碼' : '瓦斯錶號'}</label>
       <input type="text" class="cell-input meter-no-input" value="${escapeHtml(slot.meterNo || '')}"
         ${editable ? '' : 'readonly'}
         data-row="${row.id}" data-type="${type}" data-field="meterNo" />
       ${slot.note ? `<div class="note-text">${escapeHtml(slot.note)}</div>` : ''}
-    </div>`;
+    </div>` : '';
+
+  const lastField = columnPrefs.last ? `
+    <div class="card-field">
+      <label>上月度數</label>
+      <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
+        ${editable ? '' : 'readonly'}
+        data-row="${row.id}" data-type="${type}" data-field="last" />
+    </div>` : '';
+
+  const usageBlock = columnPrefs.usage ? `
+    <div class="card-usage usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</div>` : '';
 
   return `
     <div class="card-meter">
       <div class="card-meter-label">${TYPE_LABEL[type]}</div>
       ${meterNoField}
-      <div class="card-meter-grid">
-        <div class="card-field">
-          <label>上月度數</label>
-          <input type="text" inputmode="decimal" class="cell-input last-input" value="${fmtNum(reading.last)}"
-            ${editable ? '' : 'readonly'}
-            data-row="${row.id}" data-type="${type}" data-field="last" />
-        </div>
+      <div class="card-meter-grid${columnPrefs.last ? '' : ' single-col'}">
+        ${lastField}
         <div class="card-field field-this ${statusClass}" data-row="${row.id}" data-type="${type}">
           <label>本月度數</label>
           <div class="this-input-row">
@@ -519,7 +526,7 @@ function meterCardBlock(row, type) {
           </div>
         </div>
       </div>
-      <div class="card-usage usage-display ${statusClass}" data-row="${row.id}" data-type="${type}">${usageInnerHtml(st, cost, row.id, type)}</div>
+      ${usageBlock}
     </div>`;
 }
 
@@ -600,6 +607,10 @@ function renderTable() {
 
   let totalCards = 0;
   ['water', 'electric', 'gas'].forEach((type) => {
+    const navBtn = document.querySelector(`.type-nav-btn[data-target="${type}"]`);
+    if (navBtn) navBtn.style.display = columnPrefs[type] ? '' : 'none';
+
+    if (!columnPrefs[type]) return;
     const rowsForType = state.rows.filter((row) => cardMatchesFilter(row, type));
     if (!rowsForType.length) return;
     totalCards += rowsForType.length;

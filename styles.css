@@ -550,6 +550,7 @@ button {
   grid-template-columns: 1fr 1fr;
   gap: 10px;
 }
+.card-meter-grid.single-col { grid-template-columns: 1fr; }
 
 .card-field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
 
