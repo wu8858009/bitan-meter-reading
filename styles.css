@@ -827,6 +827,52 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
 
 .manage-toolbar { margin-bottom: 10px; display: flex; justify-content: space-between; }
 
+.mg-scan-cell { display: flex; align-items: center; gap: 4px; }
+.mg-scan-cell .mg-input { flex: 1; }
+.mg-scan-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--navy-2);
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.mg-scan-btn:hover { background: rgba(59, 130, 246, 0.22); }
+
+.scan-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.9);
+  z-index: 2000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.scan-overlay.open { display: flex; }
+.scan-container {
+  width: 100%;
+  max-width: 480px;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+.scan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 6px 12px 6px;
+  color: #fff;
+  font-weight: 700;
+}
+.scan-header .btn { padding: 4px 10px; }
+#reader { width: 100%; background: #000; border-radius: 12px; overflow: hidden; }
+.scan-hint { padding: 10px 4px 2px 4px; text-align: center; font-size: 12px; color: var(--muted); }
+
 /* ---------- Toast ---------- */
 
 #toast {

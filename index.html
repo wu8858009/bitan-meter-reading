@@ -212,10 +212,23 @@
       </div>
     </div>
 
+    <!-- 掃碼填入錶號 -->
+    <div id="scanOverlay" class="scan-overlay">
+      <div class="scan-container">
+        <div class="scan-header">
+          <span class="fw-bold">掃描條碼填入錶號</span>
+          <button type="button" class="btn" id="btnScanCancel">✕</button>
+        </div>
+        <div id="reader"></div>
+        <div class="scan-hint">支援 QR Code、Code 128、Code 39、EAN 等格式</div>
+      </div>
+    </div>
+
     <div id="toast"></div>
 
     </div>
 
+    <script src="https://unpkg.com/html5-qrcode"></script>
     <script src="data.js"></script>
     <script src="photos.js"></script>
     <script src="auth.js"></script>

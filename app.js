@@ -70,6 +70,58 @@ function photoControlHtml(rowId, type) {
     </div>`;
 }
 
+/* ---------------- 掃碼填入錶號 ---------------- */
+
+let html5QrCode = null;
+let scanTargetInput = null;
+
+function startScanner(targetInput) {
+  if (typeof Html5Qrcode === 'undefined') {
+    toast('掃碼功能載入失敗，請檢查網路連線');
+    return;
+  }
+  scanTargetInput = targetInput;
+  document.getElementById('scanOverlay').classList.add('open');
+
+  html5QrCode = new Html5Qrcode('reader');
+  const config = { fps: 15, qrbox: { width: 280, height: 200 }, aspectRatio: 1.0 };
+
+  html5QrCode.start(
+    { facingMode: 'environment' },
+    config,
+    (decodedText) => {
+      if (scanTargetInput) {
+        scanTargetInput.value = decodedText;
+        scanTargetInput.dispatchEvent(new Event('input', { bubbles: true }));
+        scanTargetInput.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+      if (navigator.vibrate) navigator.vibrate(100);
+      stopScanner();
+    },
+    () => { /* 忽略掃描過程中的一般辨識失敗 */ }
+  ).catch((err) => {
+    console.error('相機啟動失敗', err);
+    toast('無法啟動相機，請檢查本機相機權限設定');
+    document.getElementById('scanOverlay').classList.remove('open');
+  });
+}
+
+function stopScanner() {
+  const overlay = document.getElementById('scanOverlay');
+  if (html5QrCode && html5QrCode.isScanning) {
+    html5QrCode.stop().then(() => {
+      overlay.classList.remove('open');
+      html5QrCode.clear();
+      html5QrCode = null;
+    }).catch(() => {
+      overlay.classList.remove('open');
+    });
+  } else {
+    overlay.classList.remove('open');
+  }
+  scanTargetInput = null;
+}
+
 /* ---------------- 工具函式 ---------------- */
 
 function hasMeter(slot) {
@@ -751,9 +803,19 @@ function renderManageTable() {
       </td>
       <td class="mg-check"><input type="checkbox" class="mg-has-water" ${hasMeter(row.water) ? 'checked' : ''} /></td>
       <td class="mg-check"><input type="checkbox" class="mg-has-electric" ${hasMeter(row.electric) ? 'checked' : ''} /></td>
-      <td><input type="text" class="mg-input mg-elec-no" value="${escapeHtml(row.electric?.meterNo || '')}" placeholder="電錶號碼" /></td>
+      <td>
+        <div class="mg-scan-cell">
+          <input type="text" class="mg-input mg-elec-no" value="${escapeHtml(row.electric?.meterNo || '')}" placeholder="電錶號碼" />
+          <button type="button" class="mg-scan-btn" title="掃碼填入電錶號碼">📷</button>
+        </div>
+      </td>
       <td class="mg-check"><input type="checkbox" class="mg-has-gas" ${hasMeter(row.gas) ? 'checked' : ''} /></td>
-      <td><input type="text" class="mg-input mg-gas-no" value="${escapeHtml(row.gas?.meterNo || '')}" placeholder="瓦斯錶號" /></td>
+      <td>
+        <div class="mg-scan-cell">
+          <input type="text" class="mg-input mg-gas-no" value="${escapeHtml(row.gas?.meterNo || '')}" placeholder="瓦斯錶號" />
+          <button type="button" class="mg-scan-btn" title="掃碼填入瓦斯錶號">📷</button>
+        </div>
+      </td>
       <td><button type="button" class="btn-danger-mini mg-delete" data-idx="${idx}">刪除</button></td>
     </tr>
   `).join('');
@@ -778,6 +840,13 @@ function renderManageTable() {
       const removed = state.rows.splice(idx, 1)[0];
       Object.values(state.periods).forEach((p) => delete p.readings[removed.id]);
       renderManageTable();
+    });
+  });
+
+  wrap.querySelectorAll('.mg-scan-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetInput = btn.previousElementSibling;
+      startScanner(targetInput);
     });
   });
 }
@@ -1026,6 +1095,8 @@ function setHandlers() {
   document.getElementById('btnHistoryClose').addEventListener('click', () => closeModal('historyModal'));
 
   document.getElementById('btnPhotoPreviewClose').addEventListener('click', () => closeModal('photoPreviewModal'));
+
+  document.getElementById('btnScanCancel').addEventListener('click', stopScanner);
 
   document.getElementById('btnExportCsv').addEventListener('click', exportCSV);
   document.getElementById('btnExportExcel').addEventListener('click', exportExcel);
