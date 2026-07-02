@@ -556,9 +556,6 @@ table.meter-table thead th {
   background: var(--navy);
   color: #94a3b8;
   font-weight: 700;
-  position: sticky;
-  top: calc(var(--header-h, 0px) + var(--toolbar-h, 0px));
-  z-index: 3;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -566,7 +563,6 @@ table.meter-table thead th {
 table.meter-table thead tr:nth-child(2) th {
   background: #1e293b;
   font-size: 11.5px;
-  top: calc(var(--header-h, 0px) + var(--toolbar-h, 0px) + 32px);
 }
 
 .sticky-col {
