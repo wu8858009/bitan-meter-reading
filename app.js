@@ -77,12 +77,13 @@ function photoControlHtml(rowId, type) {
 let html5QrCode = null;
 let scanTargetInput = null;
 
-function startScanner(targetInput) {
+function startScanner(targetInput, onScanned, title) {
   if (typeof Html5Qrcode === 'undefined') {
     toast('掃碼功能載入失敗，請檢查網路連線');
     return;
   }
   scanTargetInput = targetInput;
+  document.getElementById('scanOverlayTitle').textContent = title || '掃描條碼填入錶號';
   document.getElementById('scanOverlay').classList.add('open');
 
   html5QrCode = new Html5Qrcode('reader');
@@ -99,6 +100,7 @@ function startScanner(targetInput) {
       }
       if (navigator.vibrate) navigator.vibrate(100);
       stopScanner();
+      if (onScanned) onScanned(decodedText);
     },
     () => { /* 忽略掃描過程中的一般辨識失敗 */ }
   ).catch((err) => {
@@ -106,6 +108,22 @@ function startScanner(targetInput) {
     toast('無法啟動相機，請檢查本機相機權限設定');
     document.getElementById('scanOverlay').classList.remove('open');
   });
+}
+
+function scanToFindRow() {
+  const input = document.getElementById('searchInput');
+  startScanner(input, (decodedText) => {
+    const isMobile = window.matchMedia('(max-width: 640px)').matches;
+    const target = isMobile
+      ? document.querySelector('#cardList .meter-card')
+      : document.querySelector('#tableBody tr');
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      toast(`已找到符合「${decodedText}」的項目`);
+    } else {
+      toast(`找不到符合「${decodedText}」的項目`);
+    }
+  }, '掃描條碼尋找對應項目');
 }
 
 function stopScanner() {
@@ -354,7 +372,8 @@ function rowMatchesFilter(row) {
 
   if (searchKeyword) {
     const kw = searchKeyword.toLowerCase();
-    const hay = `${row.group} ${row.name}`.toLowerCase();
+    const meterNos = [row.electric?.meterNo, row.gas?.meterNo].filter(Boolean).join(' ');
+    const hay = `${row.group} ${row.name} ${meterNos}`.toLowerCase();
     if (!hay.includes(kw)) return false;
   }
   if (currentFilter === 'all') return true;
@@ -371,7 +390,7 @@ function cardMatchesFilter(row, type) {
   if (!hasMeter(row[type])) return false;
   if (searchKeyword) {
     const kw = searchKeyword.toLowerCase();
-    const hay = `${row.group} ${row.name}`.toLowerCase();
+    const hay = `${row.group} ${row.name} ${row[type]?.meterNo || ''}`.toLowerCase();
     if (!hay.includes(kw)) return false;
   }
   if (currentFilter === 'all') return true;
@@ -1178,6 +1197,7 @@ function setHandlers() {
   document.getElementById('btnPhotoPreviewClose').addEventListener('click', () => closeModal('photoPreviewModal'));
 
   document.getElementById('btnScanCancel').addEventListener('click', stopScanner);
+  document.getElementById('btnScanSearch').addEventListener('click', scanToFindRow);
 
   document.getElementById('btnExportCsv').addEventListener('click', exportCSV);
   document.getElementById('btnExportExcel').addEventListener('click', exportExcel);

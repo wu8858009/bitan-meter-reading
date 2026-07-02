@@ -91,7 +91,10 @@
     </section>
 
     <div class="toolbar">
-      <input type="text" id="searchInput" class="search-box" placeholder="搜尋門市代號 / 名稱" />
+      <div class="search-scan-group">
+        <input type="text" id="searchInput" class="search-box" placeholder="搜尋門市代號 / 名稱 / 錶號" />
+        <button type="button" class="btn-scan-search" id="btnScanSearch" title="掃碼搜尋對應項目">📷</button>
+      </div>
       <div class="filter-chips">
         <button type="button" class="filter-chip active" data-filter="all">全部</button>
         <button type="button" class="filter-chip" data-filter="unfilled">未填</button>
@@ -237,7 +240,7 @@
     <div id="scanOverlay" class="scan-overlay">
       <div class="scan-container">
         <div class="scan-header">
-          <span class="fw-bold">掃描條碼填入錶號</span>
+          <span class="fw-bold" id="scanOverlayTitle">掃描條碼填入錶號</span>
           <button type="button" class="btn" id="btnScanCancel">✕</button>
         </div>
         <div id="reader"></div>
