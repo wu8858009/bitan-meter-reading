@@ -1031,7 +1031,13 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
 
 /* ---------- Print ---------- */
 
+@page {
+  size: A4 landscape;
+  margin: 10mm;
+}
+
 @media print {
+  html, body { background: #fff !important; }
   .app-header, .stat-grid, .toolbar, .legend, .footnote, #toast, .modal-overlay, .history-btn, .card-list, .type-nav {
     display: none !important;
   }
@@ -1041,10 +1047,34 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
     border: none;
     background: #fff !important;
     backdrop-filter: none !important;
+    overflow: visible !important;
   }
   /* 深色主題只給螢幕看，列印一律強制回到白底黑字，避免浪費碳粉且不易閱讀 */
-  table.meter-table { min-width: 0; font-size: 10px; background: #fff; }
-  table.meter-table th, table.meter-table td { border-color: #ccc; color: #000; background: #fff !important; }
-  table.meter-table thead th, table.meter-table thead tr:nth-child(2) th, tfoot td { background: #eee !important; color: #000 !important; top: 0 !important; }
-  .cell-input { border: none; color: #000; background: transparent; }
+  table.meter-table {
+    width: 100%;
+    min-width: 0;
+    font-size: 8.5px;
+    background: #fff;
+  }
+  table.meter-table th, table.meter-table td {
+    border-color: #ccc;
+    color: #000;
+    background: #fff !important;
+    padding: 3px 2px;
+    white-space: normal;
+    word-break: break-all;
+  }
+  /* 讓表頭在每一頁列印時都重複出現，並改回一般定位以配合分頁 */
+  table.meter-table thead { display: table-header-group; }
+  table.meter-table tbody tr { page-break-inside: avoid; }
+  table.meter-table thead th, table.meter-table thead tr:nth-child(2) th, tfoot td {
+    background: #eee !important;
+    color: #000 !important;
+    position: static !important;
+  }
+  .sticky-col { position: static !important; min-width: 0; }
+  .cell-input, .meter-no-input { border: none; color: #000; background: transparent; min-width: 0; width: 100%; }
+  .meter-no-cell { min-width: 0; }
+  .this-input-row { display: block; }
+  .photo-control, .btn-apply-rollover, .badge-rollover { display: none !important; }
 }
