@@ -874,6 +874,12 @@ table.history-table th, table.history-table td {
 }
 table.manage-table th { background: rgba(37, 99, 235, 0.12); color: #94a3b8; }
 table.history-table th { background: var(--navy); color: #fff; }
+table.manage-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #1e293b;
+}
 table.manage-table tbody tr:hover td,
 table.history-table tbody tr:hover td { background: var(--blue-tint); }
 .manage-table .mg-input {
