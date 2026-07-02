@@ -1115,6 +1115,17 @@ function setHandlers() {
       if (e.target === overlay) overlay.classList.remove('open');
     });
   });
+
+  window.addEventListener('resize', syncHeaderHeight);
+}
+
+/* ---------------- 固定頂部功能區 ---------------- */
+
+function syncHeaderHeight() {
+  const header = document.querySelector('.app-header');
+  const toolbar = document.querySelector('.toolbar');
+  if (header) document.documentElement.style.setProperty('--header-h', `${header.offsetHeight}px`);
+  if (toolbar) document.documentElement.style.setProperty('--toolbar-h', `${toolbar.offsetHeight}px`);
 }
 
 /* ---------------- 啟動 ---------------- */
@@ -1126,6 +1137,7 @@ async function bootstrap() {
   applyRolePermissions();
   await loadPhotoKeys();
   renderAll();
+  syncHeaderHeight();
 }
 
 /*

@@ -153,8 +153,9 @@ body {
   gap: 16px;
   flex-wrap: wrap;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
-  position: relative;
-  z-index: 10;
+  position: sticky;
+  top: 0;
+  z-index: 30;
 }
 
 .brand {
@@ -343,6 +344,13 @@ button {
   gap: 10px;
   flex-wrap: wrap;
   padding: 14px 20px;
+  position: sticky;
+  top: var(--header-h, 0px);
+  z-index: 25;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
 }
 
 .search-box {
@@ -549,7 +557,7 @@ table.meter-table thead th {
   color: #94a3b8;
   font-weight: 700;
   position: sticky;
-  top: 0;
+  top: calc(var(--header-h, 0px) + var(--toolbar-h, 0px));
   z-index: 3;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -558,7 +566,7 @@ table.meter-table thead th {
 table.meter-table thead tr:nth-child(2) th {
   background: #1e293b;
   font-size: 11.5px;
-  top: 32px;
+  top: calc(var(--header-h, 0px) + var(--toolbar-h, 0px) + 32px);
 }
 
 .sticky-col {
@@ -1037,6 +1045,6 @@ table.history-table tbody tr:hover td { background: var(--blue-tint); }
   /* 深色主題只給螢幕看，列印一律強制回到白底黑字，避免浪費碳粉且不易閱讀 */
   table.meter-table { min-width: 0; font-size: 10px; background: #fff; }
   table.meter-table th, table.meter-table td { border-color: #ccc; color: #000; background: #fff !important; }
-  table.meter-table thead th, table.meter-table thead tr:nth-child(2) th, tfoot td { background: #eee !important; color: #000 !important; }
+  table.meter-table thead th, table.meter-table thead tr:nth-child(2) th, tfoot td { background: #eee !important; color: #000 !important; top: 0 !important; }
   .cell-input { border: none; color: #000; background: transparent; }
 }
