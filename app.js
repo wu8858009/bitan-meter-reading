@@ -729,6 +729,61 @@ async function createNextPeriod() {
   toast(`已建立 ${periodLabel(next)}，上月度數已自動帶入`);
 }
 
+/* ---------------- 管理期別 ---------------- */
+
+function openPeriodManageModal() {
+  renderPeriodManageList();
+  openModal('periodManageModal');
+}
+
+function renderPeriodManageList() {
+  const wrap = document.getElementById('periodManageWrap');
+  const periods = sortedPeriods().slice().reverse(); // 新到舊
+
+  wrap.innerHTML = `
+    <table class="manage-table">
+      <thead>
+        <tr><th>期別</th><th>抄表日</th><th></th></tr>
+      </thead>
+      <tbody>
+        ${periods.map((p) => `
+          <tr>
+            <td>${periodLabel(p)}${p === state.currentPeriod ? '（目前檢視中）' : ''}</td>
+            <td>${escapeHtml(state.periods[p].readingDate || '-')}</td>
+            <td><button type="button" class="btn-danger-mini btn-period-delete" data-period="${p}" ${periods.length <= 1 ? 'disabled' : ''}>刪除</button></td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
+
+  wrap.querySelectorAll('.btn-period-delete').forEach((btn) => {
+    btn.addEventListener('click', () => deletePeriod(btn.dataset.period));
+  });
+}
+
+async function deletePeriod(period) {
+  const periods = sortedPeriods();
+  if (periods.length <= 1) {
+    toast('至少需保留一個期別，無法刪除');
+    return;
+  }
+  if (!confirm(`確定要刪除 ${periodLabel(period)} 的抄表資料嗎？此操作無法復原，該期拍攝的照片也會一併刪除。`)) return;
+
+  delete state.periods[period];
+  if (state.currentPeriod === period) {
+    state.currentPeriod = sortedPeriods().pop(); // 切到剩下期別中最新的一期
+  }
+  saveState();
+
+  try {
+    await deletePhotosForPeriod(period);
+  } catch (err) { /* 照片刪除失敗不影響期別資料本身已刪除的結果 */ }
+
+  await loadPhotoKeys();
+  renderPeriodManageList();
+  renderAll();
+  toast(`已刪除 ${periodLabel(period)}`);
+}
+
 /* ---------------- 進位補正 ---------------- */
 
 function applyRolloverCorrection(rowId, type) {
@@ -1100,7 +1155,7 @@ function toast(msg) {
 /* ---------------- 角色權限 ---------------- */
 
 const ADMIN_ONLY_BUTTON_IDS = [
-  'btnNextPeriod', 'btnPrice', 'btnManage',
+  'btnNextPeriod', 'btnPrice', 'btnManage', 'btnPeriodManage',
   'btnExportCsv', 'btnExportExcel', 'btnPrint',
   'btnBackupExport', 'btnBackupImport',
 ];
@@ -1220,6 +1275,9 @@ function setHandlers() {
   document.getElementById('btnManageAdd').addEventListener('click', addManageRow);
   document.getElementById('btnManageSave').addEventListener('click', saveManageTable);
   document.getElementById('btnManageCancel').addEventListener('click', () => closeModal('manageModal'));
+
+  document.getElementById('btnPeriodManage').addEventListener('click', openPeriodManageModal);
+  document.getElementById('btnPeriodManageClose').addEventListener('click', () => closeModal('periodManageModal'));
 
   document.getElementById('btnColumnPrefs').addEventListener('click', openColumnPrefsModal);
   document.getElementById('btnColumnPrefsSave').addEventListener('click', saveColumnPrefsFromModal);

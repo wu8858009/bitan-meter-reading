@@ -76,3 +76,18 @@ async function getPhotoBlob(period, rowId, type) {
     req.onerror = () => reject(req.error);
   });
 }
+
+async function deletePhotosForPeriod(period) {
+  const db = await openPhotoDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(PHOTO_STORE_NAME, 'readwrite');
+    const cursorReq = tx.objectStore(PHOTO_STORE_NAME).openCursor();
+    cursorReq.onsuccess = () => {
+      const cursor = cursorReq.result;
+      if (!cursor) { resolve(); return; }
+      if (cursor.value.period === period) cursor.delete();
+      cursor.continue();
+    };
+    cursorReq.onerror = () => reject(cursorReq.error);
+  });
+}

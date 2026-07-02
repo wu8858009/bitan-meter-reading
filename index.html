@@ -106,6 +106,7 @@
         <div class="toolbar-menu-dropdown" id="toolbarMenuDropdown">
           <button class="btn" id="btnPrice" type="button">💰 單價設定</button>
           <button class="btn" id="btnManage" type="button">🗂️ 管理抄表項目</button>
+          <button class="btn" id="btnPeriodManage" type="button">🗓️ 管理期別</button>
           <button class="btn" id="btnColumnPrefs" type="button">🧩 欄位設定</button>
           <button class="btn" id="btnExportCsv" type="button">📄 匯出 CSV</button>
           <button class="btn" id="btnExportExcel" type="button">📊 匯出 Excel</button>
@@ -200,6 +201,17 @@
         <div class="modal-footer">
           <button class="btn" id="btnManageCancel" type="button">取消</button>
           <button class="btn btn-primary" id="btnManageSave" type="button">儲存變更</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 管理期別 modal -->
+    <div class="modal-overlay" id="periodManageModal">
+      <div class="modal">
+        <div class="modal-header">管理期別</div>
+        <div class="modal-body" id="periodManageWrap"></div>
+        <div class="modal-footer">
+          <button class="btn" id="btnPeriodManageClose" type="button">關閉</button>
         </div>
       </div>
     </div>
